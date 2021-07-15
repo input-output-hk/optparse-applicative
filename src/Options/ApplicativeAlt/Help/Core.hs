@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Options.ApplicativeAlt.Help.Core (
   cmdDesc,
   briefDesc,
@@ -44,21 +46,27 @@ safelast :: [a] -> Maybe a
 safelast = foldl' (const Just) Nothing
 
 -- | Generate description for a single option.
-optDesc :: ParserPrefs -> OptDescStyle ann -> ArgumentReachability -> Option ann a -> (Chunk (Doc ann), Parenthetic)
+optDesc :: forall ann a. ParserPrefs -> OptDescStyle ann -> ArgumentReachability -> Option ann a -> (Chunk (Doc ann), Parenthetic)
 optDesc pprefs style _reachability opt =
-  let names =
+  let names :: [OptName]
+      names =
         sort . optionNames . optMain $ opt
+      meta :: Chunk (Doc ann)
       meta =
         stringChunk $ optMetaVar opt
+      descs :: [Doc ann]
       descs =
         map (pretty . showOption) names
+      descriptions :: Chunk (Doc ann)
       descriptions =
         listToChunk (intersperse (descSep style) descs)
+      desc :: Chunk (Doc ann)
       desc
         | prefHelpLongEquals pprefs && not (isEmpty meta) && any isLongName (safelast names) =
           descriptions <> stringChunk "=" <> meta
         | otherwise =
           descriptions <<+>> meta
+      show_opt :: Bool
       show_opt
         | descGlobal style && not (propShowGlobal (optProps opt)) =
           False
@@ -66,6 +74,7 @@ optDesc pprefs style _reachability opt =
           descHidden style
         | otherwise =
           optVisibility opt == Visible
+      wrapping :: Parenthetic
       wrapping
         | null names =
           NeverRequired
@@ -73,11 +82,13 @@ optDesc pprefs style _reachability opt =
           MaybeRequired
         | otherwise =
           AlwaysRequired
+      rendered :: Chunk (Doc ann)
       rendered
         | not show_opt =
           mempty
         | otherwise =
           desc
+      modified :: Chunk (Doc ann)
       modified =
         maybe id fmap (optDescMod opt) rendered
    in (modified, wrapping)
@@ -109,8 +120,8 @@ missingDesc = briefDesc' False
 -- | Generate a brief help text for a parser, allowing the specification
 --   of if optional arguments are show.
 briefDesc' :: Bool -> ParserPrefs -> Parser ann a -> Chunk (Doc ann)
-briefDesc' showOptional pprefs =
-  wrapOver NoDefault MaybeRequired
+briefDesc' showOptional pprefs = id
+    . wrapOver NoDefault MaybeRequired
     . foldTree pprefs style
     . mfilterOptional
     . treeMapParser (optDesc pprefs style)
@@ -130,7 +141,7 @@ briefDesc' showOptional pprefs =
 wrapOver :: AltNodeType -> Parenthetic -> (Chunk (Doc ann), Parenthetic) -> Chunk (Doc ann)
 wrapOver altnode mustWrapBeyond (chunk, wrapping)
   | altnode == MarkDefault =
-    fmap brackets chunk
+    fmap (\c -> group (flatAlt (pretty "{A{ " <> brackets c <> pretty "}A}") (brackets c))) chunk
   | wrapping > mustWrapBeyond =
     fmap parens chunk
   | otherwise =
