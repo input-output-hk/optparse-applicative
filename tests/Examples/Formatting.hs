@@ -1,7 +1,7 @@
 module Examples.Formatting where
 
 import           Data.Monoid
-import           Options.Applicative
+import           Options.ApplicativeAlt
 import           Prelude
 
 opts :: Parser ann Int

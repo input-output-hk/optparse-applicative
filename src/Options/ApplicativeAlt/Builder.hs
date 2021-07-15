@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP #-}
 
-module Options.Applicative.Builder (
+module Options.ApplicativeAlt.Builder (
   -- * Parser builders
   --
   -- | This module contains utility functions and combinators to create parsers
@@ -114,12 +114,12 @@ import Data.Semigroup hiding (option)
 #endif
 import Data.String (fromString, IsString)
 
-import Options.Applicative.Builder.Completer
-import Options.Applicative.Builder.Internal
-import Options.Applicative.Common
-import Options.Applicative.Types
-import Options.Applicative.Help.Pretty
-import Options.Applicative.Help.Chunk
+import Options.ApplicativeAlt.Builder.Completer
+import Options.ApplicativeAlt.Builder.Internal
+import Options.ApplicativeAlt.Common
+import Options.ApplicativeAlt.Types
+import Options.ApplicativeAlt.Help.Pretty
+import Options.ApplicativeAlt.Help.Chunk
 
 -- Readers --
 
@@ -216,7 +216,7 @@ hidden = optionMod $ \p ->
 
 -- | Apply a function to the option description in the usage text.
 --
--- > import Options.Applicative.Help
+-- > import Options.ApplicativeAlt.Help
 -- > flag' () (short 't' <> style bold)
 --
 -- /NOTE/: This builder is more flexible than its name and example

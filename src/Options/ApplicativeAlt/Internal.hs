@@ -5,7 +5,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Options.Applicative.Internal
+module Options.ApplicativeAlt.Internal
   ( P
   , MonadP(..)
   , ParseError(..)
@@ -43,7 +43,7 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State (StateT, get, put, modify, evalStateT, runStateT)
 import Data.Proxy
 
-import Options.Applicative.Types
+import Options.ApplicativeAlt.Types
 
 class (Alternative m, MonadPlus m) => MonadP ann m where
   enterContext :: String -> ParserInfo ann a -> m ()

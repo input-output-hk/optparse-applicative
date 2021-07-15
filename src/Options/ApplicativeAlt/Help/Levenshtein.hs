@@ -1,4 +1,4 @@
-module Options.Applicative.Help.Levenshtein (
+module Options.ApplicativeAlt.Help.Levenshtein (
     editDistance
   ) where
 

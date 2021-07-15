@@ -1,4 +1,4 @@
-module Options.Applicative (
+module Options.ApplicativeAlt (
   -- * Applicative option parsers
   --
   -- | This module exports all one should need for defining and using
@@ -231,8 +231,8 @@ module Options.Applicative (
 -- reexport Applicative here for convenience
 import Control.Applicative
 
-import Options.Applicative.Common
-import Options.Applicative.Builder
-import Options.Applicative.Builder.Completer
-import Options.Applicative.Extra
-import Options.Applicative.Types
+import Options.ApplicativeAlt.Common
+import Options.ApplicativeAlt.Builder
+import Options.ApplicativeAlt.Builder.Completer
+import Options.ApplicativeAlt.Extra
+import Options.ApplicativeAlt.Types

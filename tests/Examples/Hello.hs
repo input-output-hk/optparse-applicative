@@ -1,7 +1,7 @@
 {-# LANGUAGE CPP #-}
 module Examples.Hello where
 
-import Options.Applicative
+import Options.ApplicativeAlt
 import Data.Semigroup ((<>))
 import Control.Monad (replicateM_)
 

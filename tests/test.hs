@@ -23,16 +23,16 @@ import           System.Exit
 import           Test.QuickCheck hiding (Success, Failure)
 import           Test.QuickCheck.Property
 
-import           Options.Applicative
-import           Options.Applicative.Types
-import qualified Options.Applicative.NonEmpty
+import           Options.ApplicativeAlt
+import           Options.ApplicativeAlt.Types
+import qualified Options.ApplicativeAlt.NonEmpty
 
 
-import qualified Options.Applicative.Help as H
-import           Options.Applicative.Help.Pretty (Doc)
-import qualified Options.Applicative.Help.Pretty as Doc
-import           Options.Applicative.Help.Chunk
-import           Options.Applicative.Help.Levenshtein
+import qualified Options.ApplicativeAlt.Help as H
+import           Options.ApplicativeAlt.Help.Pretty (Doc)
+import qualified Options.ApplicativeAlt.Help.Pretty as Doc
+import           Options.ApplicativeAlt.Help.Chunk
+import           Options.ApplicativeAlt.Help.Levenshtein
 
 import           Prelude
 
@@ -855,14 +855,14 @@ prop_issue_402 = once $
 
 prop_nice_some1 :: Property
 prop_nice_some1 = once $
-  let x = Options.Applicative.NonEmpty.some1 (flag' () (short 'a'))
+  let x = Options.ApplicativeAlt.NonEmpty.some1 (flag' () (short 'a'))
       p = prefs (multiSuffix "...")
       r = show . extractChunk $ H.briefDesc p x
   in r === "(-a)..."
 
 prop_some1_works :: Property
 prop_some1_works = once $
-  let p = Options.Applicative.NonEmpty.some1 (flag' () (short 'a'))
+  let p = Options.ApplicativeAlt.NonEmpty.some1 (flag' () (short 'a'))
       i = info p idm
       result = run i ["-a", "-a"]
   in assertResult result $ \xs -> () :| [()] === xs

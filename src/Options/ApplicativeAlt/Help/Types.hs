@@ -1,4 +1,4 @@
-module Options.Applicative.Help.Types (
+module Options.ApplicativeAlt.Help.Types (
     ParserHelp (..)
   , renderHelp
   ) where
@@ -6,8 +6,8 @@ module Options.Applicative.Help.Types (
 import Data.Semigroup
 import Prelude
 
-import Options.Applicative.Help.Chunk
-import Options.Applicative.Help.Pretty
+import Options.ApplicativeAlt.Help.Chunk
+import Options.ApplicativeAlt.Help.Pretty
 
 import Prettyprinter.Render.String
 

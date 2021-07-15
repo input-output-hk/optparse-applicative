@@ -1,11 +1,11 @@
 {-# LANGUAGE CPP, Rank2Types, ExistentialQuantification #-}
-module Options.Applicative.NonEmpty (
+module Options.ApplicativeAlt.NonEmpty (
   some1
 ) where
 
 import Data.List.NonEmpty (NonEmpty (..))
 
-import Options.Applicative.Types
+import Options.ApplicativeAlt.Types
 import Control.Applicative
 import Prelude
 

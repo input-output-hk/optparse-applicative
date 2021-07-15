@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Options.Applicative.Help.Chunk
+module Options.ApplicativeAlt.Help.Chunk
   ( Chunk(..)
   , chunked
   , listToChunk
@@ -23,7 +23,7 @@ import Data.Semigroup
 import Prelude
 import Prettyprinter
 
-import Options.Applicative.Help.Pretty
+import Options.ApplicativeAlt.Help.Pretty
 
 -- | The free monoid on a semigroup 'a'.
 newtype Chunk a = Chunk

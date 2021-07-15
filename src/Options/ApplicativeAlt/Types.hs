@@ -1,5 +1,5 @@
 {-# LANGUAGE CPP, Rank2Types, ExistentialQuantification #-}
-module Options.Applicative.Types (
+module Options.ApplicativeAlt.Types (
   ParseError(..),
   ParserInfo(..),
   ParserPrefs(..),
@@ -61,9 +61,9 @@ import Prelude
 
 import System.Exit (ExitCode(..))
 
-import Options.Applicative.Help.Types
-import Options.Applicative.Help.Pretty
-import Options.Applicative.Help.Chunk
+import Options.ApplicativeAlt.Help.Types
+import Options.ApplicativeAlt.Help.Pretty
+import Options.ApplicativeAlt.Help.Chunk
 
 
 data ParseError ann

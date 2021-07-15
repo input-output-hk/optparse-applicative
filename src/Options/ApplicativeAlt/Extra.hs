@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Options.Applicative.Extra (
+module Options.ApplicativeAlt.Extra (
   -- * Extra parser utilities
   --
   -- | This module contains high-level functions to run parsers.
@@ -30,14 +30,14 @@ import System.Environment (getArgs, getProgName)
 import System.Exit (exitSuccess, exitWith, ExitCode(..))
 import System.IO (hPutStrLn, stderr)
 
-import Options.Applicative.BashCompletion
-import Options.Applicative.Builder
-import Options.Applicative.Builder.Internal
-import Options.Applicative.Common
-import Options.Applicative.Help
+import Options.ApplicativeAlt.BashCompletion
+import Options.ApplicativeAlt.Builder
+import Options.ApplicativeAlt.Builder.Internal
+import Options.ApplicativeAlt.Common
+import Options.ApplicativeAlt.Help
 
-import Options.Applicative.Internal
-import Options.Applicative.Types
+import Options.ApplicativeAlt.Internal
+import Options.ApplicativeAlt.Types
 
 -- | A hidden \"helper\" option which always fails.
 --

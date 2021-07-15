@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP #-}
 
-module Options.Applicative.Builder.Completer
+module Options.ApplicativeAlt.Builder.Completer
   ( Completer
   , mkCompleter
   , listIOCompleter
@@ -16,7 +16,7 @@ import Data.List (isPrefixOf)
 import System.Process (readProcess)
 #endif
 
-import Options.Applicative.Types
+import Options.ApplicativeAlt.Types
 
 -- | Create a 'Completer' from an IO action
 listIOCompleter :: IO [String] -> Completer

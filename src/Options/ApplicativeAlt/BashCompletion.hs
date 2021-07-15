@@ -6,7 +6,7 @@
 -- See
 -- <http://github.com/pcapriotti/optparse-applicative/wiki/Bash-Completion the wiki>
 -- for more information on bash completion.
-module Options.Applicative.BashCompletion
+module Options.ApplicativeAlt.BashCompletion
   ( bashCompletionParser
   ) where
 
@@ -16,12 +16,12 @@ import Data.Foldable ( asum )
 import Data.List ( isPrefixOf )
 import Data.Maybe ( fromMaybe, listToMaybe )
 
-import Options.Applicative.Builder
-import Options.Applicative.Common
-import Options.Applicative.Internal
-import Options.Applicative.Types
-import Options.Applicative.Help.Pretty
-import Options.Applicative.Help.Chunk
+import Options.ApplicativeAlt.Builder
+import Options.ApplicativeAlt.Common
+import Options.ApplicativeAlt.Internal
+import Options.ApplicativeAlt.Types
+import Options.ApplicativeAlt.Help.Pretty
+import Options.ApplicativeAlt.Help.Chunk
 import Prettyprinter.Render.String
 
 -- | Provide basic or rich command completions

@@ -1,6 +1,6 @@
 module Examples.Alternatives where
 
-import Options.Applicative
+import Options.ApplicativeAlt
 
 data Value = A | B
   deriving (Eq, Show)

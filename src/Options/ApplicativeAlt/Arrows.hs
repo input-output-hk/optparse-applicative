@@ -6,7 +6,7 @@
 -- structures, or records where the order of fields is different from the order
 -- in which the parsers should be applied.
 --
--- For example, an 'Options.Applicative.Builder.arguments` parser often needs
+-- For example, an 'Options.ApplicativeAlt.Builder.arguments` parser often needs
 -- to be applied last, and that makes it inconvenient to use it for a field
 -- which is not the last one in a record.
 --
@@ -24,7 +24,7 @@
 --
 -- Parser arrows, created out of regular 'Parser' values using the 'asA'
 -- function, are arrows taking @()@ as argument and returning the parsed value.
-module Options.Applicative.Arrows (
+module Options.ApplicativeAlt.Arrows (
   module Control.Arrow,
   A(..),
   asA,
@@ -35,7 +35,7 @@ module Options.Applicative.Arrows (
 import Control.Arrow
 import Control.Category (Category(..))
 
-import Options.Applicative
+import Options.ApplicativeAlt
 
 import Prelude hiding ((.), id)
 

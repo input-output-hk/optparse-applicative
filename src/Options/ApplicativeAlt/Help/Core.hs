@@ -1,4 +1,4 @@
-module Options.Applicative.Help.Core (
+module Options.ApplicativeAlt.Help.Core (
   cmdDesc,
   briefDesc,
   missingDesc,
@@ -27,10 +27,10 @@ import Data.Monoid (mempty)
 import Data.Semigroup (Semigroup (..))
 import Prelude hiding (any)
 
-import Options.Applicative.Common
-import Options.Applicative.Types
-import Options.Applicative.Help.Pretty
-import Options.Applicative.Help.Chunk
+import Options.ApplicativeAlt.Common
+import Options.ApplicativeAlt.Types
+import Options.ApplicativeAlt.Help.Pretty
+import Options.ApplicativeAlt.Help.Chunk
 
 -- | Style for rendering an option.
 data OptDescStyle ann
@@ -259,15 +259,15 @@ parserUsage pprefs p progn =
   case prefUsageOverflow pprefs of
     UsageOverflowAlign ->
       hsep
-        [ string "Usage:",
-          string progn,
+        [ pretty "Usage:",
+          pretty progn,
           align (extractChunk (briefDesc pprefs p))
         ]
     UsageOverflowHang level ->
       hang level $
         hsep
-          [ string "Usage:",
-            string progn,
+          [ pretty "Usage:",
+            pretty progn,
             extractChunk (briefDesc pprefs p)
           ]
 

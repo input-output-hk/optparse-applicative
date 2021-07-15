@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Options.Applicative.Help.Pretty
+module Options.ApplicativeAlt.Help.Pretty
   ( module Prettyprinter
   , (.$.)
   , groupOrNestLine

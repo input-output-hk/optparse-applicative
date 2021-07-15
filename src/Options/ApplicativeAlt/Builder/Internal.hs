@@ -1,4 +1,4 @@
-module Options.Applicative.Builder.Internal (
+module Options.ApplicativeAlt.Builder.Internal (
   -- * Internals
   Mod(..),
   HasName(..),
@@ -29,8 +29,8 @@ import Control.Monad (mplus)
 import Data.Semigroup hiding (Option)
 import Prelude
 
-import Options.Applicative.Common
-import Options.Applicative.Types
+import Options.ApplicativeAlt.Common
+import Options.ApplicativeAlt.Types
 
 data OptionFields ann a = OptionFields
   { optNames :: [OptName]
@@ -121,7 +121,7 @@ instance Semigroup (DefaultProp a) where
 --
 -- One rarely needs to deal with modifiers directly, as most of the times it is
 -- sufficient to pass them to builders (such as 'strOption' or 'flag') to
--- create options (see 'Options.Applicative.Builder').
+-- create options (see 'Options.ApplicativeAlt.Builder').
 data Mod ann f a = Mod (f a -> f a)
                    (DefaultProp a)
                    (OptProperties ann -> OptProperties ann)

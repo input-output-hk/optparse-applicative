@@ -2,7 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Options.Applicative.Common (
+module Options.ApplicativeAlt.Common (
   -- * Option parsers
   --
   -- | A 'Parser' is composed of a list of options. Several kinds of options
@@ -63,8 +63,8 @@ import Data.Maybe (maybeToList, isJust, isNothing)
 import Data.Proxy
 import Prelude
 
-import Options.Applicative.Internal
-import Options.Applicative.Types
+import Options.ApplicativeAlt.Internal
+import Options.ApplicativeAlt.Types
 
 showOption :: OptName -> String
 showOption (OptLong n) = "--" ++ n

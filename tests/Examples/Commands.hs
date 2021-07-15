@@ -3,7 +3,7 @@ module Examples.Commands where
 
 import Data.List
 import Data.Monoid
-import Options.Applicative
+import Options.ApplicativeAlt
 
 #if __GLASGOW_HASKELL__ <= 702
 (<>) :: Monoid a => a -> a -> a

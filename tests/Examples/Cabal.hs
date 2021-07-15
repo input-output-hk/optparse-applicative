@@ -1,8 +1,8 @@
 {-# LANGUAGE Arrows, CPP #-}
 module Examples.Cabal where
 
-import Options.Applicative
-import Options.Applicative.Arrows
+import Options.ApplicativeAlt
+import Options.ApplicativeAlt.Arrows
 
 import Data.Monoid
 
