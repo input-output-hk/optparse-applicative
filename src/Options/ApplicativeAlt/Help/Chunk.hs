@@ -94,10 +94,9 @@ extractChunk = fromMaybe mempty . unChunk
 (<<+>>) :: Chunk (Doc ann) -> Chunk (Doc ann) -> Chunk (Doc ann)
 (<<+>>) = chunked (<+>)
 
--- | Concatenate two 'Chunk's with a softline in between.  This is exactly like
--- '<<+>>', but uses a softline instead of a space.
+-- | Concatenate two 'Chunk's.
 (<</>>) :: Chunk (Doc ann) -> Chunk (Doc ann) -> Chunk (Doc ann)
-(<</>>) = chunked (\x y -> x <> softline <> y)
+(<</>>) = chunked (\x y -> x <> y)
 
 -- | Concatenate 'Chunk's vertically.
 vcatChunks :: [Chunk (Doc ann)] -> Chunk (Doc ann)

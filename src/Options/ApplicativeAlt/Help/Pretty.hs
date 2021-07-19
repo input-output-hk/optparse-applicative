@@ -1,10 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Options.ApplicativeAlt.Help.Pretty
   ( module Prettyprinter
   , (.$.)
   , groupOrNestLine
   , altSep
+  , line_
   ) where
 
 import           Control.Applicative
@@ -16,7 +18,7 @@ import qualified Prettyprinter as PP
 import           Prelude
 
 (.$.) :: Doc ann -> Doc ann -> Doc ann
-(.$.) x y = x <> line <> y
+(.$.) x y = x <> line_ "%" <> y
 
 
 -- | Apply the function if we're not at the
@@ -39,7 +41,7 @@ groupOrNestLine :: Doc ann -> Doc ann
 groupOrNestLine =
   Union
     <$> flatten
-    <*> ifNotAtRoot (line <>) . nest 2
+    <*> ifNotAtRoot (line_ "=" <>) . nest 2
   where flatten :: Doc ann -> Doc ann
         flatten doc = case doc of
           FlatAlt _ y     -> flatten y
@@ -72,5 +74,8 @@ groupOrNestLine =
 altSep :: Bool -> Doc ann -> Doc ann -> Doc ann
 altSep compact x y =
   if compact
-    then group (x <+> "|" <> line) <> softline' <> y
-    else group (x <> hardline <> "|" <> space) <> y
+    then group (x <> pretty @String "@" <> "|") <> pretty @String "*" <> y
+    else group (x <> line_ "$" <> "|" <> pretty @String "^") <> y
+
+line_ :: String -> Doc ann
+line_ s = pretty s <> line

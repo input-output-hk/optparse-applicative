@@ -127,7 +127,7 @@ briefDesc' compact showOptional pprefs = id
     . wrapOver compact NoDefault MaybeRequired
     . foldTree compact pprefs style
     . mfilterOptional
-    . treeMapParser (optDesc pprefs style)
+    . treeMapParser (\a b -> (first (fmap ((pretty "{A" <>) . (<> pretty "A}"))) (optDesc pprefs style a b)))
   where
     mfilterOptional
       | showOptional =
@@ -147,7 +147,7 @@ enclose2
     -> Doc ann -- ^ x
     -> Doc ann -- ^ LxR
 enclose2 compact l r x = l <> s <> x <> nl <> r <> nl
-  where nl = if compact then mempty else line
+  where nl = if compact then mempty else line_ "!"
         s = if compact then mempty else pretty " "
 
 parens2 :: Bool -> Doc ann -> Doc ann
@@ -170,15 +170,16 @@ wrapOver compact altnode mustWrapBeyond (chunk, wrapping)
     chunk
 
 maybeNest :: Bool -> Doc ann -> Doc ann
-maybeNest compact d = group (flatAlt (line <> pretty "  " <> nest 2 d) d)
+maybeNest compact d = group (flatAlt (line_ "&" <> pretty "  " <> nest 2 d) d)
 
 -- Fold a tree of option docs into a single doc with fully marked
 -- optional areas and groups.
-foldTree :: Bool -> ParserPrefs -> OptDescStyle ann -> OptTree (Chunk (Doc ann), Parenthetic) -> (Chunk (Doc ann), Parenthetic)
+foldTree :: forall ann. Bool -> ParserPrefs -> OptDescStyle ann -> OptTree (Chunk (Doc ann), Parenthetic) -> (Chunk (Doc ann), Parenthetic)
 foldTree compact _ _ (Leaf x) =
   x
 foldTree compact prefs s (MultNode xs) =
-  let go = id
+  let go :: OptTree (Chunk (Doc ann), Parenthetic) -> Chunk (Doc ann) -> Chunk (Doc ann)
+      go = id
         . (<</>>)
         . fmap (maybeNest compact)
         . wrapOver compact NoDefault MaybeRequired
