@@ -21,6 +21,7 @@ module Options.ApplicativeAlt.Help.Core (
 
 import Control.Applicative
 import Control.Monad (guard)
+import Data.Bifunctor
 import Data.Function (on)
 import Data.List (sort, intersperse, groupBy)
 import Data.Foldable (any, foldl')
@@ -33,6 +34,8 @@ import Options.ApplicativeAlt.Common
 import Options.ApplicativeAlt.Types
 import Options.ApplicativeAlt.Help.Pretty
 import Options.ApplicativeAlt.Help.Chunk
+
+import qualified Data.Text.Prettyprint.Doc                 as New
 
 -- | Style for rendering an option.
 data OptDescStyle ann
@@ -109,20 +112,20 @@ cmdDesc = mapParser desc
         _ -> mempty
 
 -- | Generate a brief help text for a parser.
-briefDesc :: ParserPrefs -> Parser ann a -> Chunk (Doc ann)
-briefDesc = briefDesc' True
+briefDesc :: Bool -> ParserPrefs -> Parser ann a -> Chunk (Doc ann)
+briefDesc compact = briefDesc' compact True
 
 -- | Generate a brief help text for a parser, only including mandatory
 --   options and arguments.
 missingDesc :: ParserPrefs -> Parser ann a -> Chunk (Doc ann)
-missingDesc = briefDesc' False
+missingDesc = briefDesc' False False
 
 -- | Generate a brief help text for a parser, allowing the specification
 --   of if optional arguments are show.
-briefDesc' :: Bool -> ParserPrefs -> Parser ann a -> Chunk (Doc ann)
-briefDesc' showOptional pprefs = id
-    . wrapOver NoDefault MaybeRequired
-    . foldTree pprefs style
+briefDesc' :: Bool -> Bool -> ParserPrefs -> Parser ann a -> Chunk (Doc ann)
+briefDesc' compact showOptional pprefs = id
+    . wrapOver compact NoDefault MaybeRequired
+    . foldTree compact pprefs style
     . mfilterOptional
     . treeMapParser (optDesc pprefs style)
   where
@@ -137,24 +140,48 @@ briefDesc' showOptional pprefs = id
         descGlobal = False
       }
 
+enclose2
+    :: Bool
+    -> Doc ann -- ^ L
+    -> Doc ann -- ^ R
+    -> Doc ann -- ^ x
+    -> Doc ann -- ^ LxR
+enclose2 compact l r x = l <> pretty " " <> x <> nl <> r <> nl
+  where nl = if compact then mempty else line
+
+parens2 :: Bool -> Doc ann -> Doc ann
+parens2 compact = enclose2 compact lparen rparen
+
+brackets2 :: Bool -> Doc ann -> Doc ann
+brackets2 compact = enclose2 compact lbracket rbracket
+
+braces2 :: Bool -> Doc ann -> Doc ann
+braces2 compact = enclose2 compact lbrace rbrace
+
 -- | Wrap a doc in parentheses or brackets if required.
-wrapOver :: AltNodeType -> Parenthetic -> (Chunk (Doc ann), Parenthetic) -> Chunk (Doc ann)
-wrapOver altnode mustWrapBeyond (chunk, wrapping)
+wrapOver :: Bool -> AltNodeType -> Parenthetic -> (Chunk (Doc ann), Parenthetic) -> Chunk (Doc ann)
+wrapOver compact altnode mustWrapBeyond (chunk, wrapping)
   | altnode == MarkDefault =
-    fmap (\c -> group (flatAlt (pretty "{A{ " <> brackets c <> pretty "}A}") (brackets c))) chunk
+    fmap (\c -> group (flatAlt (brackets2 compact c) (brackets2 True c))) chunk
   | wrapping > mustWrapBeyond =
-    fmap parens chunk
+    fmap (\c -> group (flatAlt (parens2 compact c) (parens2 True c))) chunk
   | otherwise =
     chunk
 
+maybeNest :: Bool -> Doc ann -> Doc ann
+maybeNest compact d = group (flatAlt (line <> pretty "  " <> nest 2 d) d)
+
 -- Fold a tree of option docs into a single doc with fully marked
 -- optional areas and groups.
-foldTree :: ParserPrefs -> OptDescStyle ann -> OptTree (Chunk (Doc ann), Parenthetic) -> (Chunk (Doc ann), Parenthetic)
-foldTree _ _ (Leaf x) =
+foldTree :: Bool -> ParserPrefs -> OptDescStyle ann -> OptTree (Chunk (Doc ann), Parenthetic) -> (Chunk (Doc ann), Parenthetic)
+foldTree compact _ _ (Leaf x) =
   x
-foldTree prefs s (MultNode xs) =
-  let go =
-        (<</>>) . wrapOver NoDefault MaybeRequired . foldTree prefs s
+foldTree compact prefs s (MultNode xs) =
+  let go = id
+        . (<</>>)
+        . fmap (maybeNest compact)
+        . wrapOver compact NoDefault MaybeRequired
+        . foldTree compact prefs s
       x =
         foldr go mempty xs
       wrapLevel =
@@ -163,24 +190,25 @@ foldTree prefs s (MultNode xs) =
   where
     mult_wrap [_] = NeverRequired
     mult_wrap _ = MaybeRequired
-foldTree prefs s (AltNode b xs) =
+foldTree compact prefs s (AltNode b xs) =
   (\x -> (x, NeverRequired))
-    . fmap groupOrNestLine
-    . wrapOver b MaybeRequired
+    -- . fmap groupOrNestLine
+    -- . fmap (maybeNest compact)
+    . wrapOver compact b MaybeRequired
     . alt_node
     . filter (not . isEmpty . fst)
-    . map (foldTree prefs s)
+    . map (foldTree compact prefs s)
     $ xs
   where
     alt_node :: [(Chunk (Doc ann), Parenthetic)] -> (Chunk (Doc ann), Parenthetic)
     alt_node [n] = n
     alt_node ns =
       (\y -> (y, AlwaysRequired))
-        . foldr (chunked altSep . wrapOver NoDefault MaybeRequired) mempty
+        . foldr (chunked (altSep compact) . wrapOver compact NoDefault MaybeRequired) mempty
         $ ns
-foldTree prefs s (BindNode x) =
+foldTree compact prefs s (BindNode x) =
   let rendered =
-        wrapOver NoDefault NeverRequired (foldTree prefs s x)
+        wrapOver compact NoDefault NeverRequired (foldTree compact prefs s x)
 
       -- We always want to display the rendered option
       -- if it exists, and only attach the suffix then.
@@ -272,14 +300,14 @@ parserUsage pprefs p progn =
       hsep
         [ pretty "Usage:",
           pretty progn,
-          align (extractChunk (briefDesc pprefs p))
+          align (extractChunk (briefDesc False pprefs p))
         ]
     UsageOverflowHang level ->
       hang level $
         hsep
           [ pretty "Usage:",
             pretty progn,
-            extractChunk (briefDesc pprefs p)
+            extractChunk (briefDesc False pprefs p)
           ]
 
 -- | Peek at the structure of the rendered tree within.

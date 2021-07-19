@@ -773,7 +773,7 @@ prop_grouped_some_option_ellipsis = once $
   let x :: Parser ann String
       x = strOption (short 'x' <> metavar "X")
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> some x)
+      r = show . extractChunk $ H.briefDesc False p (x *> some x)
   in r === "-x X (-x X)..."
 
 prop_grouped_many_option_ellipsis :: Property
@@ -781,7 +781,7 @@ prop_grouped_many_option_ellipsis = once $
   let x :: Parser ann String
       x = strOption (short 'x' <> metavar "X")
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> many x)
+      r = show . extractChunk $ H.briefDesc False p (x *> many x)
   in r === "-x X [-x X]..."
 
 prop_grouped_some_argument_ellipsis :: Property
@@ -789,7 +789,7 @@ prop_grouped_some_argument_ellipsis = once $
   let x :: Parser ann String
       x = strArgument (metavar "X")
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> some x)
+      r = show . extractChunk $ H.briefDesc False p (x *> some x)
   in r === "X X..."
 
 prop_grouped_many_argument_ellipsis :: Property
@@ -797,7 +797,7 @@ prop_grouped_many_argument_ellipsis = once $
   let x :: Parser ann String
       x = strArgument (metavar "X")
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> many x)
+      r = show . extractChunk $ H.briefDesc False p (x *> many x)
   in r === "X [X]..."
 
 prop_grouped_some_pairs_argument_ellipsis :: Property
@@ -805,7 +805,7 @@ prop_grouped_some_pairs_argument_ellipsis = once $
   let x :: Parser ann String
       x = strArgument (metavar "X")
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> some (x *> x))
+      r = show . extractChunk $ H.briefDesc False p (x *> some (x *> x))
   in r === "X (X X)..."
 
 prop_grouped_many_pairs_argument_ellipsis :: Property
@@ -813,7 +813,7 @@ prop_grouped_many_pairs_argument_ellipsis = once $
   let x :: Parser ann String
       x = strArgument (metavar "X")
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> many (x *> x))
+      r = show . extractChunk $ H.briefDesc False p (x *> many (x *> x))
   in r === "X [X X]..."
 
 prop_grouped_some_dual_option_ellipsis :: Property
@@ -821,7 +821,7 @@ prop_grouped_some_dual_option_ellipsis = once $
   let x :: Parser ann String
       x = strOption (short 'a' <> short 'b' <> metavar "X")
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> some x)
+      r = show . extractChunk $ H.briefDesc False p (x *> some x)
   in r === "(-a|-b X) (-a|-b X)..."
 
 prop_grouped_many_dual_option_ellipsis :: Property
@@ -829,35 +829,35 @@ prop_grouped_many_dual_option_ellipsis = once $
   let x :: Parser ann String
       x = strOption (short 'a' <> short 'b' <> metavar "X")
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> many x)
+      r = show . extractChunk $ H.briefDesc False p (x *> many x)
   in r === "(-a|-b X) [-a|-b X]..."
 
 prop_grouped_some_dual_flag_ellipsis :: Property
 prop_grouped_some_dual_flag_ellipsis = once $
   let x = flag' () (short 'a' <> short 'b')
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> some x)
+      r = show . extractChunk $ H.briefDesc False p (x *> some x)
   in r === "(-a|-b) (-a|-b)..."
 
 prop_grouped_many_dual_flag_ellipsis :: Property
 prop_grouped_many_dual_flag_ellipsis = once $
   let x = flag' () (short 'a' <> short 'b')
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p (x *> many x)
+      r = show . extractChunk $ H.briefDesc False p (x *> many x)
   in r === "(-a|-b) [-a|-b]..."
 
 prop_issue_402 :: Property
 prop_issue_402 = once $
   let x = some (flag' () (short 'a')) <|> some (flag' () (short 'b' <> internal))
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p x
+      r = show . extractChunk $ H.briefDesc False p x
   in r === "(-a)..."
 
 prop_nice_some1 :: Property
 prop_nice_some1 = once $
   let x = Options.ApplicativeAlt.NonEmpty.some1 (flag' () (short 'a'))
       p = prefs (multiSuffix "...")
-      r = show . extractChunk $ H.briefDesc p x
+      r = show . extractChunk $ H.briefDesc False p x
   in r === "(-a)..."
 
 prop_some1_works :: Property

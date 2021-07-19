@@ -69,6 +69,8 @@ groupOrNestLine =
 --   does fit on the line, there is at least a space,
 --   but it's possible for y to still appear on the
 --   next line.
-altSep :: Doc ann -> Doc ann -> Doc ann
-altSep x y =
-  group (x <+> "|" <> line) <> softline' <> y
+altSep :: Bool -> Doc ann -> Doc ann -> Doc ann
+altSep compact x y =
+  if compact
+    then group (x <+> "|" <> line) <> softline' <> y
+    else group (x <> hardline <> "|" <> space) <> y
