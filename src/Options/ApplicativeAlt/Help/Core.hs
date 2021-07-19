@@ -146,8 +146,9 @@ enclose2
     -> Doc ann -- ^ R
     -> Doc ann -- ^ x
     -> Doc ann -- ^ LxR
-enclose2 compact l r x = l <> pretty " " <> x <> nl <> r <> nl
+enclose2 compact l r x = l <> s <> x <> nl <> r <> nl
   where nl = if compact then mempty else line
+        s = if compact then mempty else pretty " "
 
 parens2 :: Bool -> Doc ann -> Doc ann
 parens2 compact = enclose2 compact lparen rparen
