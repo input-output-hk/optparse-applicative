@@ -95,6 +95,7 @@ module Options.Applicative (
   showDefault,
   metavar,
   noArgError,
+  helpRenderHelp,
   hidden,
   internal,
   style,
