@@ -4,7 +4,6 @@
 
 module Options.Applicative.Help.Pretty
   ( module PP
-  , module Prettyprinter.Render.Terminal
 
   , Doc
   , SimpleDoc
@@ -16,6 +15,8 @@ module Options.Applicative.Help.Pretty
   , altSep
   , hangAtIfOver
 
+  , Ann(..)
+
   , enclose
   , parens
   , brackets
@@ -23,12 +24,15 @@ module Options.Applicative.Help.Pretty
   , indent
   , nest
 
-  , text
-  , plain
-  , string
-
+  -- TODO Remove these
+  -- , (<$>)
+  , (</>)
   , (<$$>)
   , (<//>)
+  , string
+
+  , text
+  , plain
 
   , isEffectivelyEmpty
 
@@ -39,24 +43,27 @@ module Options.Applicative.Help.Pretty
 #if !MIN_VERSION_base(4,11,0)
 import           Data.Semigroup ((<>), mempty)
 #endif
-import qualified Data.Text.Lazy as Lazy
 
+import           Options.Applicative.Help.Ann
 import           Prettyprinter hiding ((<>), Doc, enclose, parens, brackets, hang, indent, nest)
 import qualified Prettyprinter as PP
 import qualified Prettyprinter.Internal as PPI
-import           Prettyprinter.Render.Terminal
+import           Prettyprinter.Render.String (renderShowS)
 
 import           Prelude
 
-type Doc = PP.Doc AnsiStyle
-type SimpleDoc = SimpleDocStream AnsiStyle
+type Doc = PPI.Doc Ann
+type SimpleDoc = SimpleDocStream Ann
 
+-- | Traced version of 'PP.indent'.
 indent :: Int -> Doc -> Doc
-indent = PP.indent
+indent n = annTrace 1 "indent" . PP.indent n
 
 (.$.) :: Doc -> Doc -> Doc
-(.$.) x y = x <> line <> y
+(.$.) x y = annTrace 1 "(.$.)" (x <> line <> y)
 
+-- | Apply the function if we're not at the
+--   start of our nesting level.
 ifNotAtRoot :: (Doc -> Doc) -> Doc -> Doc
 ifNotAtRoot = ifElseAtRoot id
 
@@ -74,7 +81,7 @@ ifElseAtRoot f g doc =
 -- | Render flattened text on this line, or start a new line before rendering
 --   any text, nesting subsequent lines in the group.
 groupOrNestLine :: Doc -> Doc
-groupOrNestLine d =
+groupOrNestLine d = annTrace 1 "groupOrNestLine" $
   (PPI.Union
     <$> flatten
     <*> ifNotAtRoot (line <>)) d
@@ -100,7 +107,8 @@ altSep :: Doc -> Doc -> Doc
 altSep x y =
   group (x <+> PPI.Char '|' <> line) <//> y
 
--- | Hang at column j if we're over it, otherwise align.
+-- | Printer hacks to get nice indentation for long commands
+--   and subcommands.
 hangAtIfOver :: Int -> Int -> Doc -> Doc
 hangAtIfOver i j d =
   PPI.Column $ \k ->
@@ -110,52 +118,63 @@ hangAtIfOver i j d =
       linebreak <> ifAtRoot (indent i) d
 
 (</>) :: Doc -> Doc -> Doc
-(</>) x y = x <> softline <> y
+(</>) x y = annTrace 1 "(</>)" $ x <> softline <> y
 
 (<$$>) :: Doc -> Doc -> Doc
-(<$$>) x y = x <> linebreak <> y
+(<$$>) x y = annTrace 1 "(<$$>)" $x <> linebreak <> y
 
 (<//>) :: Doc -> Doc -> Doc
-(<//>) x y = x <> softbreak <> y
+(<//>) x y = annTrace 1 "(<//>)" $ x <> softbreak <> y
 
 linebreak :: Doc
-linebreak = flatAlt line mempty
+linebreak = annTrace 0 "linebreak" $ flatAlt line mempty
 
 softbreak :: Doc
-softbreak = group linebreak
+softbreak = annTrace 0 "softbreak" $ group linebreak
 
+-- | Traced version of 'PP.string'.
 string :: String -> Doc
-string = PP.pretty
+string = annTrace 0 "string" . PP.pretty
 
+-- | Traced version of 'PP.parens'.
 parens :: Doc -> Doc
-parens = PP.parens
+parens = annTrace 1 "parens" . PP.parens
 
+-- | Traced version of 'PP.brackets'.
 brackets :: Doc -> Doc
-brackets = PP.brackets
+brackets = annTrace 1 "brackets" . PP.brackets
 
-enclose :: Doc -> Doc -> Doc -> Doc
-enclose = PP.enclose
+-- | Traced version of 'PP.enclose'.
+enclose
+    :: Doc -- ^ L
+    -> Doc -- ^ R
+    -> Doc -- ^ x
+    -> Doc -- ^ LxR
+enclose l r x = annTrace 1 "enclose" (PP.enclose l r x)
 
+-- | Traced version of 'PP.hang'.
 hang :: Int -> Doc -> Doc
-hang = PP.hang
+hang n = annTrace 1 "hang" . PP.hang n
 
+-- | Traced version of 'PP.nest'.
 nest :: Int -> Doc -> Doc
-nest = PP.nest
+nest n = annTrace 1 "nest" . PP.nest n
 
+-- | Determine if the document is empty when rendered
 isEffectivelyEmpty :: Doc -> Bool
 isEffectivelyEmpty doc = case doc of
-  PPI.Fail          -> True
-  PPI.Empty         -> True
-  PPI.Char _        -> False
-  PPI.Text _ _      -> False
-  PPI.Line          -> False
-  PPI.FlatAlt _ d   -> isEffectivelyEmpty d
-  PPI.Cat a b       -> isEffectivelyEmpty a && isEffectivelyEmpty b
-  PPI.Nest _ d      -> isEffectivelyEmpty d
-  PPI.Union _ d     -> isEffectivelyEmpty d
-  PPI.Column _      -> True
+  PPI.Fail -> True
+  PPI.Empty -> True
+  PPI.Char _ -> False
+  PPI.Text _ _ -> False
+  PPI.Line -> False
+  PPI.FlatAlt _ d -> isEffectivelyEmpty d
+  PPI.Cat a b -> isEffectivelyEmpty a && isEffectivelyEmpty b
+  PPI.Nest _ d -> isEffectivelyEmpty d
+  PPI.Union _ d -> isEffectivelyEmpty d
+  PPI.Column _ -> True
   PPI.WithPageWidth _ -> False
-  PPI.Nesting _     -> False
+  PPI.Nesting _ -> False
   PPI.Annotated _ d -> isEffectivelyEmpty d
 
 prettyString :: Double -> Int -> Doc -> String
@@ -164,7 +183,7 @@ prettyString ribbonFraction lineWidth
   . layoutPretty LayoutOptions { layoutPageWidth = AvailablePerLine lineWidth ribbonFraction }
 
 streamToString :: SimpleDoc -> String
-streamToString = Lazy.unpack . Prettyprinter.Render.Terminal.renderLazy
+streamToString stream = renderShowS stream ""
 
 text :: String -> Doc
 text = pretty

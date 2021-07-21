@@ -533,6 +533,7 @@ helpShowGlobals = PrefsMod $ \p -> p { prefHelpShowGlobal = True }
 helpEmbedBriefDesc :: (Doc -> Doc) -> PrefsMod
 helpEmbedBriefDesc f = PrefsMod $ \p -> p { prefEmbedBriefDesc = f }
 
+
 -- | Custom render function
 helpRenderHelp :: (Int -> ParserHelp -> String) -> PrefsMod
 helpRenderHelp f = PrefsMod $ \p -> p { prefRenderHelp = f }
