@@ -1,9 +1,11 @@
 {-# LANGUAGE CPP #-}
+
+{-# OPTIONS_GHC -fno-warn-warnings-deprecations #-}
+
 module Options.Applicative.Help.Pretty
-  ( module Prettyprinter
-  , module Prettyprinter.Render.Terminal
+  ( module PP
+
   , Doc
-  , SimpleDoc
 
   , (.$.)
   , (</>)
@@ -12,30 +14,47 @@ module Options.Applicative.Help.Pretty
   , altSep
   , hangAtIfOver
 
-  , prettyString
+  , Ann(..)
+
+  , enclose
+  , parens
+  , brackets
+  , hang
+  , indent
+  , nest
+
+  -- TODO Remove these
+  -- , (<$>)
+  , (</>)
+  , (<$$>)
+  , (<//>)
+  , string
+
+  , isEffectivelyEmpty
+
+  , renderShowS
   ) where
 
 #if !MIN_VERSION_base(4,11,0)
 import           Data.Semigroup ((<>), mempty)
 #endif
 
-import           Prettyprinter hiding (Doc)
+import           Options.Applicative.Help.Ann
+import           Prettyprinter hiding ((<>), Doc, enclose, parens, brackets, hang, indent, nest)
 import qualified Prettyprinter as PP
-import qualified Prettyprinter.Render.String as PP
-import           Prettyprinter.Render.Terminal
+import qualified Prettyprinter.Internal as PPI
+import           Prettyprinter.Render.String (renderShowS)
 
 import           Prelude
 
-type Doc = PP.Doc Prettyprinter.Render.Terminal.AnsiStyle
-type SimpleDoc = SimpleDocStream AnsiStyle
+type Doc = PPI.Doc Ann
 
-linebreak :: Doc
-linebreak = flatAlt line mempty
+-- | Traced version of 'PP.indent'.
+indent :: Int -> Doc -> Doc
+indent n = annTrace 1 "indent" . PP.indent n
 
 (.$.) :: Doc -> Doc -> Doc
-x .$. y = x <> line <> y
-(</>) :: Doc -> Doc -> Doc
-x </> y = x <> softline <> y
+(.$.) x y = annTrace 1 "(.$.)" (x <> line <> y)
 
 -- | Apply the function if we're not at the
 --   start of our nesting level.
@@ -53,8 +72,8 @@ ifAtRoot =
 --   start of our nesting level.
 ifElseAtRoot :: (Doc -> Doc) -> (Doc -> Doc) -> Doc -> Doc
 ifElseAtRoot f g doc =
-  nesting $ \i ->
-    column $ \j ->
+  PPI.Nesting $ \i ->
+    PPI.Column $ \j ->
       if i == j
         then f doc
         else g doc
@@ -65,9 +84,26 @@ ifElseAtRoot f g doc =
 --   This will also nest subsequent lines in the
 --   group.
 groupOrNestLine :: Doc -> Doc
-groupOrNestLine =
-  group . ifNotAtRoot (linebreak <>) . nest 2
+groupOrNestLine d = annTrace 1 "groupOrNestLine" $
+  (PPI.Union
+    <$> flatten
+    <*> ifNotAtRoot (line <>)) d
+  where flatten :: Doc -> Doc
+        flatten doc = case doc of
+          PPI.FlatAlt _ y     -> flatten y
+          PPI.Cat x y         -> PPI.Cat (flatten x) (flatten y)
+          PPI.Nest i x        -> PPI.Nest i (flatten x)
+          PPI.Line            -> PPI.Fail
+          PPI.Union x _       -> flatten x
+          PPI.Column f        -> PPI.Column (flatten . f)
+          PPI.WithPageWidth f -> PPI.WithPageWidth (flatten . f)
+          PPI.Nesting f       -> PPI.Nesting (flatten . f)
+          PPI.Annotated ann x -> PPI.Annotated ann (flatten x)
 
+          x@PPI.Fail   -> x
+          x@PPI.Empty  -> x
+          x@PPI.Char{} -> x
+          x@PPI.Text{} -> x
 
 -- | Separate items in an alternative with a pipe.
 --
@@ -81,8 +117,7 @@ groupOrNestLine =
 --   next line.
 altSep :: Doc -> Doc -> Doc
 altSep x y =
-  group (x <+> pretty '|' <> line) <> group linebreak <>  y
-
+  group (x <+> PPI.Char '|' <> line) <//> y
 
 -- | Printer hacks to get nice indentation for long commands
 --   and subcommands.
@@ -97,23 +132,68 @@ altSep x y =
 --   the starting column, and it won't be indented more.
 hangAtIfOver :: Int -> Int -> Doc -> Doc
 hangAtIfOver i j d =
-  column $ \k ->
+  PPI.Column $ \k ->
     if k <= j then
       align d
     else
       linebreak <> ifAtRoot (indent i) d
 
+(</>) :: Doc -> Doc -> Doc
+(</>) x y = annTrace 1 "(</>)" $ x <> softline <> y
 
-renderPretty :: Double -> Int -> Doc -> SimpleDocStream AnsiStyle
-renderPretty ribbonFraction lineWidth
-  = layoutSmart LayoutOptions
-      { layoutPageWidth = AvailablePerLine lineWidth ribbonFraction }
+(<$$>) :: Doc -> Doc -> Doc
+(<$$>) x y = annTrace 1 "(<$$>)" $x <> linebreak <> y
 
-prettyString :: Double -> Int -> Doc -> String
-prettyString ribbonFraction lineWidth
-  = streamToString
-  . renderPretty ribbonFraction lineWidth
+(<//>) :: Doc -> Doc -> Doc
+(<//>) x y = annTrace 1 "(<//>)" $ x <> softbreak <> y
 
-streamToString :: SimpleDocStream AnsiStyle -> String
-streamToString stream =
-  PP.renderShowS stream ""
+linebreak :: Doc
+linebreak = annTrace 0 "linebreak" $ flatAlt line mempty
+
+softbreak :: Doc
+softbreak = annTrace 0 "softbreak" $ group linebreak
+
+-- | Traced version of 'PP.string'.
+string :: String -> Doc
+string = annTrace 0 "string" . PP.pretty
+
+-- | Traced version of 'PP.parens'.
+parens :: Doc -> Doc
+parens = annTrace 1 "parens" . PP.parens
+
+-- | Traced version of 'PP.brackets'.
+brackets :: Doc -> Doc
+brackets = annTrace 1 "brackets" . PP.brackets
+
+-- | Traced version of 'PP.enclose'.
+enclose
+    :: Doc -- ^ L
+    -> Doc -- ^ R
+    -> Doc -- ^ x
+    -> Doc -- ^ LxR
+enclose l r x = annTrace 1 "enclose" (PP.enclose l r x)
+
+-- | Traced version of 'PP.hang'.
+hang :: Int -> Doc -> Doc
+hang n = annTrace 1 "hang" . PP.hang n
+
+-- | Traced version of 'PP.nest'.
+nest :: Int -> Doc -> Doc
+nest n = annTrace 1 "nest" . PP.nest n
+
+-- | Determine if the document is empty when rendered
+isEffectivelyEmpty :: Doc -> Bool
+isEffectivelyEmpty doc = case doc of
+  PPI.Fail -> True
+  PPI.Empty -> True
+  PPI.Char _ -> False
+  PPI.Text _ _ -> False
+  PPI.Line -> False
+  PPI.FlatAlt _ d -> isEffectivelyEmpty d
+  PPI.Cat a b -> isEffectivelyEmpty a && isEffectivelyEmpty b
+  PPI.Nest _ d -> isEffectivelyEmpty d
+  PPI.Union _ d -> isEffectivelyEmpty d
+  PPI.Column _ -> True
+  PPI.WithPageWidth _ -> False
+  PPI.Nesting _ -> False
+  PPI.Annotated _ d -> isEffectivelyEmpty d
