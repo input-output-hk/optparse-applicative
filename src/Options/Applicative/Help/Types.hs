@@ -43,6 +43,6 @@ helpText (ParserHelp e s h u d b g f) =
 -- | Convert a help text to 'String'.
 renderHelp :: Int -> ParserHelp -> String
 renderHelp cols
-  = (`renderShowS` "")
-  . layoutPretty (LayoutOptions (AvailablePerLine cols 1.0))
+  = (`displayS` "")
+  . renderPretty 1.0 cols
   . helpText
