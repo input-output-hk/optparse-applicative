@@ -166,7 +166,7 @@ foldTree prefs s (MultNode xs) =
                 . fmap (uncurry (<>))
                 . zip leads
                 $ fmap (wrapOver NoDefault MaybeRequired . first (fmap (nest 2)) . foldTree prefs s) xs
-                ) <> pure line
+                )
           )
         compact :: Chunk Doc
         compact =
@@ -178,7 +178,7 @@ foldTree prefs s (MultNode xs) =
     mult_wrap [_] = NeverRequired
     mult_wrap _ = MaybeRequired
     leads :: [Chunk Doc]
-    leads = fmap pure (pretty " ":repeat (line <> pretty "  "))
+    leads = fmap pure (mempty:repeat (line <> pretty "  "))
 
 foldTree prefs s (AltNode b xs) = first (annTrace 3 "foldTree2") $
   (\x -> (x, NeverRequired))
