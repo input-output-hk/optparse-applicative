@@ -15,6 +15,45 @@ module Options.Applicative.Help.Pretty
   , indent
   , nest
 
+  , text
+  , plain
+  , deunderline
+  , underline
+  , debold
+  , bold
+  , ondullwhite
+  , onwhite
+  , ondullcyan
+  , oncyan
+  , ondullmagenta
+  , onmagenta
+  , ondullblue
+  , onblue
+  , ondullyellow
+  , onyellow
+  , ondullgreen
+  , ongreen
+  , ondullred
+  , onred
+  , ondullblack
+  , onblack
+  , dullwhite
+  , white
+  , dullcyan
+  , cyan
+  , dullmagenta
+  , magenta
+  , dullblue
+  , blue
+  , dullyellow
+  , yellow
+  , dullgreen
+  , green
+  , dullred
+  , red
+  , dullblack
+  , black
+
   -- TODO Remove these
   -- , (<$>)
   , (</>)
@@ -164,3 +203,155 @@ isEffectivelyEmpty doc = case doc of
   PPI.WithPageWidth _ -> False
   PPI.Nesting _ -> False
   PPI.Annotated _ d -> isEffectivelyEmpty d
+
+-- TODO: Implement properly.  This is needed for compatability.
+text :: String -> Doc
+text = pretty
+
+-- TODO: Implement properly.  This is needed for compatability.
+plain :: Doc -> Doc
+plain = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+deunderline :: Doc -> Doc
+deunderline = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+underline :: Doc -> Doc
+underline = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+debold :: Doc -> Doc
+debold = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+bold :: Doc -> Doc
+bold = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ondullwhite :: Doc -> Doc
+ondullwhite = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+onwhite :: Doc -> Doc
+onwhite = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ondullcyan :: Doc -> Doc
+ondullcyan = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+oncyan :: Doc -> Doc
+oncyan = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ondullmagenta :: Doc -> Doc
+ondullmagenta = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+onmagenta :: Doc -> Doc
+onmagenta = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ondullblue :: Doc -> Doc
+ondullblue = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+onblue :: Doc -> Doc
+onblue = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ondullyellow :: Doc -> Doc
+ondullyellow = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+onyellow :: Doc -> Doc
+onyellow = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ondullgreen :: Doc -> Doc
+ondullgreen = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ongreen :: Doc -> Doc
+ongreen = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ondullred :: Doc -> Doc
+ondullred = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+onred :: Doc -> Doc
+onred = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+ondullblack :: Doc -> Doc
+ondullblack = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+onblack :: Doc -> Doc
+onblack = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+dullwhite :: Doc -> Doc
+dullwhite = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+white :: Doc -> Doc
+white = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+dullcyan :: Doc -> Doc
+dullcyan = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+cyan :: Doc -> Doc
+cyan = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+dullmagenta :: Doc -> Doc
+dullmagenta = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+magenta :: Doc -> Doc
+magenta = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+dullblue :: Doc -> Doc
+dullblue = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+blue :: Doc -> Doc
+blue = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+dullyellow :: Doc -> Doc
+dullyellow = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+yellow :: Doc -> Doc
+yellow = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+dullgreen :: Doc -> Doc
+dullgreen = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+green :: Doc -> Doc
+green = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+dullred :: Doc -> Doc
+dullred = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+red :: Doc -> Doc
+red = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+dullblack :: Doc -> Doc
+dullblack = id
+
+-- TODO: Implement properly.  This is needed for compatability.
+black :: Doc -> Doc
+black = id
