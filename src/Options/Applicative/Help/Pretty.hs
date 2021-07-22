@@ -15,6 +15,45 @@ module Options.Applicative.Help.Pretty
   , indent
   , nest
 
+  , text
+  , plain
+  , deunderline
+  , underline
+  , debold
+  , bold
+  , ondullwhite
+  , onwhite
+  , ondullcyan
+  , oncyan
+  , ondullmagenta
+  , onmagenta
+  , ondullblue
+  , onblue
+  , ondullyellow
+  , onyellow
+  , ondullgreen
+  , ongreen
+  , ondullred
+  , onred
+  , ondullblack
+  , onblack
+  , dullwhite
+  , white
+  , dullcyan
+  , cyan
+  , dullmagenta
+  , magenta
+  , dullblue
+  , blue
+  , dullyellow
+  , yellow
+  , dullgreen
+  , green
+  , dullred
+  , red
+  , dullblack
+  , black
+
   -- TODO Remove these
   -- , (<$>)
   , (</>)
@@ -37,6 +76,7 @@ import           Prettyprinter hiding ((<>), Doc, enclose, parens, brackets, han
 import qualified Prettyprinter as PP
 import qualified Prettyprinter.Internal as PPI
 import           Prettyprinter.Render.String (renderShowS)
+import qualified Options.Applicative.Help.Style as S
 
 import           Prelude
 
@@ -164,3 +204,117 @@ isEffectivelyEmpty doc = case doc of
   PPI.WithPageWidth _ -> False
   PPI.Nesting _ -> False
   PPI.Annotated _ d -> isEffectivelyEmpty d
+
+text :: String -> Doc
+text = pretty
+
+plain :: Doc -> Doc
+plain = id
+
+deunderline :: Doc -> Doc
+deunderline = id
+
+underline :: Doc -> Doc
+underline = annotate (AnnStyle S.underlined)
+
+debold :: Doc -> Doc
+debold = id
+
+bold :: Doc -> Doc
+bold = annotate (AnnStyle S.bold)
+
+ondullwhite :: Doc -> Doc
+ondullwhite = annotate (AnnStyle (S.bgColorDull S.White))
+
+onwhite :: Doc -> Doc
+onwhite = annotate (AnnStyle (S.bgColor S.White))
+
+ondullcyan :: Doc -> Doc
+ondullcyan = annotate (AnnStyle (S.bgColorDull S.Cyan))
+
+oncyan :: Doc -> Doc
+oncyan = annotate (AnnStyle (S.bgColor S.Cyan))
+
+ondullmagenta :: Doc -> Doc
+ondullmagenta = annotate (AnnStyle (S.bgColorDull S.Magenta))
+
+onmagenta :: Doc -> Doc
+onmagenta = annotate (AnnStyle (S.bgColor S.Magenta))
+
+ondullblue :: Doc -> Doc
+ondullblue = annotate (AnnStyle (S.bgColorDull S.Blue))
+
+onblue :: Doc -> Doc
+onblue = annotate (AnnStyle (S.bgColor S.Blue))
+
+ondullyellow :: Doc -> Doc
+ondullyellow = annotate (AnnStyle (S.bgColorDull S.Yellow))
+
+onyellow :: Doc -> Doc
+onyellow = annotate (AnnStyle (S.bgColor S.Yellow))
+
+ondullgreen :: Doc -> Doc
+ondullgreen = annotate (AnnStyle (S.bgColorDull S.Green))
+
+ongreen :: Doc -> Doc
+ongreen = annotate (AnnStyle (S.bgColor S.Green))
+
+ondullred :: Doc -> Doc
+ondullred = annotate (AnnStyle (S.bgColorDull S.Red))
+
+onred :: Doc -> Doc
+onred = annotate (AnnStyle (S.bgColor S.Red))
+
+ondullblack :: Doc -> Doc
+ondullblack = annotate (AnnStyle (S.bgColorDull S.Black))
+
+onblack :: Doc -> Doc
+onblack = annotate (AnnStyle (S.bgColor S.Black))
+
+dullwhite :: Doc -> Doc
+dullwhite = annotate (AnnStyle (S.colorDull S.White))
+
+white :: Doc -> Doc
+white = annotate (AnnStyle (S.color S.White))
+
+dullcyan :: Doc -> Doc
+dullcyan = annotate (AnnStyle (S.colorDull S.Cyan))
+
+cyan :: Doc -> Doc
+cyan = annotate (AnnStyle (S.color S.Cyan))
+
+dullmagenta :: Doc -> Doc
+dullmagenta = annotate (AnnStyle (S.colorDull S.Magenta))
+
+magenta :: Doc -> Doc
+magenta = annotate (AnnStyle (S.color S.Magenta))
+
+dullblue :: Doc -> Doc
+dullblue = annotate (AnnStyle (S.colorDull S.Blue))
+
+blue :: Doc -> Doc
+blue = annotate (AnnStyle (S.color S.Blue))
+
+dullyellow :: Doc -> Doc
+dullyellow = annotate (AnnStyle (S.colorDull S.Yellow))
+
+yellow :: Doc -> Doc
+yellow = annotate (AnnStyle (S.color S.Yellow))
+
+dullgreen :: Doc -> Doc
+dullgreen = annotate (AnnStyle (S.colorDull S.Green))
+
+green :: Doc -> Doc
+green = annotate (AnnStyle (S.color S.Green))
+
+dullred :: Doc -> Doc
+dullred = annotate (AnnStyle (S.colorDull S.Red))
+
+red :: Doc -> Doc
+red = annotate (AnnStyle (S.color S.Red))
+
+dullblack :: Doc -> Doc
+dullblack = annotate (AnnStyle (S.colorDull S.Black))
+
+black :: Doc -> Doc
+black = annotate (AnnStyle (S.color S.Black))
