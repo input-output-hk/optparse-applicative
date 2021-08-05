@@ -38,8 +38,7 @@ styleToRawText = ANSI.setSGRCode . stylesToSgrs
   where
     stylesToSgrs :: SetStyle -> [ANSI.SGR]
     stylesToSgrs (SetStyle fg bg b i u) = catMaybes
-        [ Just ANSI.Reset
-        , fmap (\(intensity, c) -> ANSI.SetColor ANSI.Foreground (convertIntensity intensity) (convertColor c)) fg
+        [ fmap (\(intensity, c) -> ANSI.SetColor ANSI.Foreground (convertIntensity intensity) (convertColor c)) fg
         , fmap (\(intensity, c) -> ANSI.SetColor ANSI.Background (convertIntensity intensity) (convertColor c)) bg
         , fmap (\_              -> ANSI.SetConsoleIntensity ANSI.BoldIntensity) b
         , fmap (\_              -> ANSI.SetItalicized True) i
