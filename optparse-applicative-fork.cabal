@@ -93,12 +93,15 @@ library
                      , Options.Applicative.Help.Core
                      , Options.Applicative.Help.Levenshtein
                      , Options.Applicative.Help.Pretty
+                     , Options.Applicative.Help.Style
                      , Options.Applicative.Help.Types
                      , Options.Applicative.NonEmpty
                      , Options.Applicative.Types
                      , Options.Applicative.Internal
 
   build-depends:       base                            == 4.*
+                     , ansi-terminal                   >= 0.4.0
+                     , text                            >= 1.2
                      , transformers                    >= 0.2 && < 0.7
                      , transformers-compat             >= 0.3 && < 0.8
                      , prettyprinter                   >= 1.7.0 && < 1.8

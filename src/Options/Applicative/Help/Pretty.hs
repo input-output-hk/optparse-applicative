@@ -78,6 +78,7 @@ import           Prettyprinter hiding ((<>), Doc, enclose, parens, brackets, han
 import qualified Prettyprinter as PP
 import qualified Prettyprinter.Internal as PPI
 import           Prettyprinter.Render.String (renderShowS)
+import qualified Options.Applicative.Help.Style as S
 
 import           Prelude
 
@@ -376,14 +377,12 @@ green = id
 dullred :: Doc -> Doc
 dullred = id
 
--- TODO: Implement properly.  This is needed for compatability.
 red :: Doc -> Doc
-red = id
+red = annotate (AnnStyle (S.color S.Red))
 
 -- TODO: Implement properly.  This is needed for compatability.
 dullblack :: Doc -> Doc
 dullblack = id
 
--- TODO: Implement properly.  This is needed for compatability.
 black :: Doc -> Doc
-black = id
+black = annotate (AnnStyle (S.color S.Black))
