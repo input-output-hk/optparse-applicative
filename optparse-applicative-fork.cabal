@@ -1,4 +1,4 @@
-name:                optparse-applicative
+name:                optparse-applicative-fork
 version:             0.16.1.0
 synopsis:            Utilities and combinators for parsing command line options
 description:
@@ -127,7 +127,7 @@ test-suite tests
                      , Examples.Hello
 
   build-depends:       base
-                     , optparse-applicative
+                     , optparse-applicative-fork
                      , QuickCheck                      >= 2.8 && < 2.15
 
   if !impl(ghc >= 8)
