@@ -205,152 +205,116 @@ isEffectivelyEmpty doc = case doc of
   PPI.Nesting _ -> False
   PPI.Annotated _ d -> isEffectivelyEmpty d
 
--- TODO: Implement properly.  This is needed for compatability.
 text :: String -> Doc
 text = pretty
 
--- TODO: Implement properly.  This is needed for compatability.
 plain :: Doc -> Doc
 plain = id
 
--- TODO: Implement properly.  This is needed for compatability.
 deunderline :: Doc -> Doc
 deunderline = id
 
--- TODO: Implement properly.  This is needed for compatability.
 underline :: Doc -> Doc
-underline = id
+underline = annotate (AnnStyle S.underlined)
 
--- TODO: Implement properly.  This is needed for compatability.
 debold :: Doc -> Doc
 debold = id
 
--- TODO: Implement properly.  This is needed for compatability.
 bold :: Doc -> Doc
-bold = id
+bold = annotate (AnnStyle S.bold)
 
--- TODO: Implement properly.  This is needed for compatability.
 ondullwhite :: Doc -> Doc
-ondullwhite = id
+ondullwhite = annotate (AnnStyle (S.bgColorDull S.White))
 
--- TODO: Implement properly.  This is needed for compatability.
 onwhite :: Doc -> Doc
-onwhite = id
+onwhite = annotate (AnnStyle (S.bgColor S.White))
 
--- TODO: Implement properly.  This is needed for compatability.
 ondullcyan :: Doc -> Doc
-ondullcyan = id
+ondullcyan = annotate (AnnStyle (S.bgColorDull S.Cyan))
 
--- TODO: Implement properly.  This is needed for compatability.
 oncyan :: Doc -> Doc
-oncyan = id
+oncyan = annotate (AnnStyle (S.bgColor S.Cyan))
 
--- TODO: Implement properly.  This is needed for compatability.
 ondullmagenta :: Doc -> Doc
-ondullmagenta = id
+ondullmagenta = annotate (AnnStyle (S.bgColorDull S.Magenta))
 
--- TODO: Implement properly.  This is needed for compatability.
 onmagenta :: Doc -> Doc
-onmagenta = id
+onmagenta = annotate (AnnStyle (S.bgColor S.Magenta))
 
--- TODO: Implement properly.  This is needed for compatability.
 ondullblue :: Doc -> Doc
-ondullblue = id
+ondullblue = annotate (AnnStyle (S.bgColorDull S.Blue))
 
--- TODO: Implement properly.  This is needed for compatability.
 onblue :: Doc -> Doc
-onblue = id
+onblue = annotate (AnnStyle (S.bgColor S.Blue))
 
--- TODO: Implement properly.  This is needed for compatability.
 ondullyellow :: Doc -> Doc
-ondullyellow = id
+ondullyellow = annotate (AnnStyle (S.bgColorDull S.Yellow))
 
--- TODO: Implement properly.  This is needed for compatability.
 onyellow :: Doc -> Doc
-onyellow = id
+onyellow = annotate (AnnStyle (S.bgColor S.Yellow))
 
--- TODO: Implement properly.  This is needed for compatability.
 ondullgreen :: Doc -> Doc
-ondullgreen = id
+ondullgreen = annotate (AnnStyle (S.bgColorDull S.Green))
 
--- TODO: Implement properly.  This is needed for compatability.
 ongreen :: Doc -> Doc
-ongreen = id
+ongreen = annotate (AnnStyle (S.bgColor S.Green))
 
--- TODO: Implement properly.  This is needed for compatability.
 ondullred :: Doc -> Doc
-ondullred = id
+ondullred = annotate (AnnStyle (S.bgColorDull S.Red))
 
--- TODO: Implement properly.  This is needed for compatability.
 onred :: Doc -> Doc
-onred = id
+onred = annotate (AnnStyle (S.bgColor S.Red))
 
--- TODO: Implement properly.  This is needed for compatability.
 ondullblack :: Doc -> Doc
-ondullblack = id
+ondullblack = annotate (AnnStyle (S.bgColorDull S.Black))
 
--- TODO: Implement properly.  This is needed for compatability.
 onblack :: Doc -> Doc
-onblack = id
+onblack = annotate (AnnStyle (S.bgColor S.Black))
 
--- TODO: Implement properly.  This is needed for compatability.
 dullwhite :: Doc -> Doc
-dullwhite = id
+dullwhite = annotate (AnnStyle (S.colorDull S.White))
 
--- TODO: Implement properly.  This is needed for compatability.
 white :: Doc -> Doc
-white = id
+white = annotate (AnnStyle (S.color S.White))
 
--- TODO: Implement properly.  This is needed for compatability.
 dullcyan :: Doc -> Doc
-dullcyan = id
+dullcyan = annotate (AnnStyle (S.colorDull S.Cyan))
 
--- TODO: Implement properly.  This is needed for compatability.
 cyan :: Doc -> Doc
-cyan = id
+cyan = annotate (AnnStyle (S.color S.Cyan))
 
--- TODO: Implement properly.  This is needed for compatability.
 dullmagenta :: Doc -> Doc
-dullmagenta = id
+dullmagenta = annotate (AnnStyle (S.colorDull S.Magenta))
 
--- TODO: Implement properly.  This is needed for compatability.
 magenta :: Doc -> Doc
-magenta = id
+magenta = annotate (AnnStyle (S.color S.Magenta))
 
--- TODO: Implement properly.  This is needed for compatability.
 dullblue :: Doc -> Doc
-dullblue = id
+dullblue = annotate (AnnStyle (S.colorDull S.Blue))
 
--- TODO: Implement properly.  This is needed for compatability.
 blue :: Doc -> Doc
-blue = id
+blue = annotate (AnnStyle (S.color S.Blue))
 
--- TODO: Implement properly.  This is needed for compatability.
 dullyellow :: Doc -> Doc
-dullyellow = id
+dullyellow = annotate (AnnStyle (S.colorDull S.Yellow))
 
--- TODO: Implement properly.  This is needed for compatability.
 yellow :: Doc -> Doc
-yellow = id
+yellow = annotate (AnnStyle (S.color S.Yellow))
 
--- TODO: Implement properly.  This is needed for compatability.
 dullgreen :: Doc -> Doc
-dullgreen = id
+dullgreen = annotate (AnnStyle (S.colorDull S.Green))
 
--- TODO: Implement properly.  This is needed for compatability.
 green :: Doc -> Doc
-green = id
+green = annotate (AnnStyle (S.color S.Green))
 
--- TODO: Implement properly.  This is needed for compatability.
 dullred :: Doc -> Doc
-dullred = id
+dullred = annotate (AnnStyle (S.colorDull S.Red))
 
 red :: Doc -> Doc
 red = annotate (AnnStyle (S.color S.Red))
 
--- TODO: Implement properly.  This is needed for compatability.
 dullblack :: Doc -> Doc
-dullblack = id
+dullblack = annotate (AnnStyle (S.colorDull S.Black))
 
 black :: Doc -> Doc
 black = annotate (AnnStyle (S.color S.Black))
