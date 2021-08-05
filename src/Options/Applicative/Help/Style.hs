@@ -11,6 +11,7 @@ module Options.Applicative.Help.Style
   , colorDull
   , bgColorDull
   , bold
+  , underlined
   , italicized
   , styleToRawText
   ) where
