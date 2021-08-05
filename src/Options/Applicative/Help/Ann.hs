@@ -6,8 +6,11 @@ module Options.Applicative.Help.Ann (
   ) where
 
 import Prettyprinter (Doc, annotate)
+import Options.Applicative.Help.Style
 
-data Ann = AnnTrace Int String
+data Ann
+  = AnnTrace Int String
+  | AnnStyle SetStyle
   deriving (Eq, Show)
 
 class CanAnnotate a where

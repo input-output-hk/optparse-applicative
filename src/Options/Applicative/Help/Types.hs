@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Options.Applicative.Help.Types (
     ParserHelp (..)
   , renderHelp
@@ -5,10 +8,18 @@ module Options.Applicative.Help.Types (
   ) where
 
 import Data.Semigroup
-import Prelude
-
+import Data.Text (Text)
 import Options.Applicative.Help.Chunk
 import Options.Applicative.Help.Pretty
+import Options.Applicative.Help.Style (styleToRawText)
+import Prelude
+import Prettyprinter.Internal (textSpaces)
+import Prettyprinter.Render.Util.Panic
+import Prettyprinter.Render.Util.StackMachine
+
+import qualified Data.Text.Lazy.Builder as B
+import qualified Data.Text as T
+import qualified Data.Text.Lazy as LT
 
 data ParserHelp = ParserHelp
   { helpError :: Chunk Doc
@@ -43,6 +54,24 @@ helpText (ParserHelp e s h u d b g f) =
 -- | Convert a help text to 'String'.
 renderHelp :: Int -> ParserHelp -> String
 renderHelp cols
-  = (`renderShowS` "")
+  = LT.unpack
+  . B.toLazyText
+  . renderAnsi
   . layoutPretty (LayoutOptions (AvailablePerLine cols 1.0))
   . helpText
+
+textToShowS :: Text -> B.Builder
+textToShowS = B.fromText
+
+renderAnsi :: SimpleDocStream Ann -> B.Builder
+renderAnsi
+  = renderSimplyDecorated B.fromText renderPush renderPop
+  where
+    renderPush :: Ann -> B.Builder
+    renderPush ann = case ann of
+      AnnTrace _ _ -> ""
+      AnnStyle setStyle -> B.fromString (styleToRawText setStyle)
+    renderPop :: Ann -> B.Builder
+    renderPop ann = case ann of
+      AnnTrace _ _ -> ""
+      AnnStyle setStyle -> B.fromString (styleToRawText setStyle)
