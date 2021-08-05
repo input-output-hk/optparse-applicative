@@ -18,12 +18,7 @@ module Options.Applicative.Help.Style
 
 import Control.Applicative
 import Data.Maybe
-import Data.Text (Text)
 
-import qualified Data.Text              as T
-import qualified Data.Text.IO           as T
-import qualified Data.Text.Lazy         as TL
-import qualified Data.Text.Lazy.Builder as TLB
 import qualified System.Console.ANSI    as ANSI
 
 data SetStyle = SetStyle
