@@ -11,7 +11,7 @@ import Data.Semigroup
 import Data.Text (Text)
 import Options.Applicative.Help.Chunk
 import Options.Applicative.Help.Pretty
-import Options.Applicative.Help.Style (SetStyle (..), styleToRawText)
+import Options.Applicative.Help.Style (SetStyle (..), styleToRawText, defaultStyle)
 import Prelude
 import Prettyprinter.Internal (textSpaces)
 import Prettyprinter.Render.Util.Panic
@@ -61,7 +61,7 @@ renderHelp cols
 
 renderAnsi :: SimpleDocStream Ann -> B.Builder
 renderAnsi
-  = renderCtxDecorated mempty B.fromText renderPush renderPop
+  = renderCtxDecorated defaultStyle B.fromText renderPush renderPop
   . alterAnnotationsS alter
   where
     alter :: Ann -> Maybe SetStyle
@@ -73,7 +73,8 @@ renderAnsi
     renderPop setStyle _ = B.fromString (styleToRawText setStyle)
 
 renderCtxDecorated
-    :: ann
+    :: Monoid ann
+    => ann
     -> (Text -> B.Builder) -- ^ Render plain 'Text'
     -> (ann -> ann -> B.Builder)  -- ^ How to render an annotation
     -> (ann -> ann -> B.Builder)  -- ^ How to render the removed annotation
@@ -88,7 +89,7 @@ renderCtxDecorated topAnn toText push pop = go [topAnn]
     go stack                  (SChar c rest)      = toText (T.singleton c) <> go stack rest
     go stack                  (SText _l t rest)   = toText t <> go stack rest
     go stack                  (SLine i rest)      = toText (T.singleton '\n') <> toText (textSpaces i) <> go stack rest
-    go stack@(ctxAnn:_)       (SAnnPush ann rest) = push ctxAnn ann <> go (ann : stack) rest
+    go stack@(ctxAnn:_)       (SAnnPush ann rest) = push ctxAnn ann <> go ((ctxAnn <> ann) : stack) rest
     go (ann:stack@(ctxAnn:_)) (SAnnPop rest)      = pop ctxAnn ann <> go stack rest
     go []                     SAnnPop{}           = panicUnpairedPop
     go _                      (SAnnPush _ _)      = error "Unpaired push"
