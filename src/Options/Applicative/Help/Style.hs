@@ -1,9 +1,12 @@
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Options.Applicative.Help.Style
   ( SetStyle (..)
-  , Intensity (..)
+  , ColorIntensity (..)
   , Layer (..)
-  , Bold (..)
-  , Underlined (..)
+  , ConsoleIntensity (..)
+  , Underlining (..)
   , Italicized (..)
   , Color (..)
   , color
@@ -14,41 +17,54 @@ module Options.Applicative.Help.Style
   , underlined
   , italicized
   , styleToRawText
+  , defaultStyle
   ) where
 
 import Control.Applicative
 import Data.Maybe
+import System.Console.ANSI (ConsoleIntensity (..), ColorIntensity (..), Underlining (..))
 
 import qualified System.Console.ANSI    as ANSI
 
 data SetStyle = SetStyle
-  { ansiForeground  :: Maybe (Intensity, Color) -- ^ Set the foreground color, or keep the old one.
-  , ansiBackground  :: Maybe (Intensity, Color) -- ^ Set the background color, or keep the old one.
-  , ansiBold        :: Maybe Bold               -- ^ Switch on boldness, or don’t do anything.
-  , ansiItalics     :: Maybe Italicized         -- ^ Switch on italics, or don’t do anything.
-  , ansiUnderlining :: Maybe Underlined         -- ^ Switch on underlining, or don’t do anything.
+  { ansiReset             :: Bool
+  , ansiForeground        :: Maybe (ColorIntensity, Color)  -- ^ Set the foreground color, or keep the old one.
+  , ansiBackground        :: Maybe (ColorIntensity, Color)  -- ^ Set the background color, or keep the old one.
+  , ansiConsoleIntensity  :: Maybe ConsoleIntensity         -- ^ Adjust boldness
+  , ansiItalics           :: Maybe Italicized               -- ^ Adjust italics
+  , ansiUnderlining       :: Maybe Underlining              -- ^ Adjust underlining
   } deriving (Eq, Ord, Show)
 
 instance Monoid SetStyle where
-    mempty = SetStyle Nothing Nothing Nothing Nothing Nothing
+    mempty = SetStyle False Nothing Nothing Nothing Nothing Nothing
     mappend = (<>)
+
+defaultStyle :: SetStyle
+defaultStyle = SetStyle
+  { ansiReset             = True
+  , ansiForeground        = Nothing
+  , ansiBackground        = Nothing
+  , ansiConsoleIntensity  = Just NormalIntensity
+  , ansiItalics           = Just NoItalics
+  , ansiUnderlining       = Just NoUnderline
+  }
+
+isItalicised :: Italicized -> Bool
+isItalicised Italicized = True
+isItalicised NoItalics = False
 
 styleToRawText :: SetStyle -> String
 styleToRawText = ANSI.setSGRCode . stylesToSgrs
   where
     stylesToSgrs :: SetStyle -> [ANSI.SGR]
-    stylesToSgrs (SetStyle fg bg b i u) = catMaybes
-        [ fmap (\(intensity, c) -> ANSI.SetColor ANSI.Foreground (convertIntensity intensity) (convertColor c)) fg
-        , fmap (\(intensity, c) -> ANSI.SetColor ANSI.Background (convertIntensity intensity) (convertColor c)) bg
-        , fmap (\_              -> ANSI.SetConsoleIntensity ANSI.BoldIntensity) b
-        , fmap (\_              -> ANSI.SetItalicized True) i
-        , fmap (\_              -> ANSI.SetUnderlining ANSI.SingleUnderline) u
+    stylesToSgrs (SetStyle r fg bg b i u) = catMaybes
+        [ if r then Just ANSI.Reset else Nothing
+        , fmap (\(intensity, c) -> ANSI.SetColor ANSI.Foreground intensity (convertColor c)) fg
+        , fmap (\(intensity, c) -> ANSI.SetColor ANSI.Background intensity (convertColor c)) bg
+        , fmap ANSI.SetConsoleIntensity b
+        , fmap (ANSI.SetItalicized . isItalicised) i
+        , fmap ANSI.SetUnderlining u
         ]
-
-    convertIntensity :: Intensity -> ANSI.ColorIntensity
-    convertIntensity = \i -> case i of
-        Vivid -> ANSI.Vivid
-        Dull  -> ANSI.Dull
 
     convertColor :: Color -> ANSI.Color
     convertColor = \c -> case c of
@@ -61,23 +77,20 @@ styleToRawText = ANSI.setSGRCode . stylesToSgrs
         Cyan    -> ANSI.Cyan
         White   -> ANSI.White
 
-data Intensity = Vivid | Dull
-    deriving (Eq, Ord, Show)
-
 data Layer = Foreground | Background
     deriving (Eq, Ord, Show)
 
-data Bold       = Bold       deriving (Eq, Ord, Show)
-data Underlined = Underlined deriving (Eq, Ord, Show)
-data Italicized = Italicized deriving (Eq, Ord, Show)
+data Italicized = Italicized | NoItalics deriving (Eq, Ord, Show)
 
 instance Semigroup SetStyle where
   cs1 <> cs2 = SetStyle
-    { ansiForeground  = ansiForeground  cs1 <|> ansiForeground  cs2
-    , ansiBackground  = ansiBackground  cs1 <|> ansiBackground  cs2
-    , ansiBold        = ansiBold        cs1 <|> ansiBold        cs2
-    , ansiItalics     = ansiItalics     cs1 <|> ansiItalics     cs2
-    , ansiUnderlining = ansiUnderlining cs1 <|> ansiUnderlining cs2 }
+    { ansiReset             = ansiReset             cs1 &&  ansiReset             cs2
+    , ansiForeground        = ansiForeground        cs1 <|> ansiForeground        cs2
+    , ansiBackground        = ansiBackground        cs1 <|> ansiBackground        cs2
+    , ansiConsoleIntensity  = ansiConsoleIntensity  cs1 <|> ansiConsoleIntensity  cs2
+    , ansiItalics           = ansiItalics           cs1 <|> ansiItalics           cs2
+    , ansiUnderlining       = ansiUnderlining       cs1 <|> ansiUnderlining       cs2
+    }
 
 data Color = Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
     deriving (Eq, Ord, Show)
@@ -100,7 +113,7 @@ bgColorDull c =  mempty { ansiBackground = Just (Dull, c) }
 
 -- | Render in __bold__.
 bold :: SetStyle
-bold = mempty { ansiBold = Just Bold }
+bold = mempty { ansiConsoleIntensity = Just BoldIntensity }
 
 -- | Render in /italics/.
 italicized :: SetStyle
@@ -108,4 +121,4 @@ italicized = mempty { ansiItalics = Just Italicized }
 
 -- | Render underlined.
 underlined :: SetStyle
-underlined = mempty { ansiUnderlining = Just Underlined }
+underlined = mempty { ansiUnderlining = Just SingleUnderline }
