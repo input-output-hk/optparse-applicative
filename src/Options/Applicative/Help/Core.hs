@@ -41,7 +41,9 @@ import Options.Applicative.Help.Ann
 import Options.Applicative.Help.Chunk
 import Options.Applicative.Help.Pretty
 
+{- HLINT ignore "Functor law" -}
 {- HLINT ignore "Redundant $" -}
+{- HLINT ignore "Redundant id" -}
 {- HLINT ignore "Use <$>" -}
 {- HLINT ignore "Use tuple-section" -}
 
@@ -158,18 +160,16 @@ foldTree _ _ (Leaf x) = first (annTrace 3 "foldTree1")
   x
 foldTree prefs s (MultNode xs) =
   ( let generous :: Chunk Doc
-        generous =
-          ( if null xs
+        generous = annTrace 3 "generous" $
+            if null xs
               then mempty
-              else
-                ( mconcat
-                . fmap (uncurry (<>))
+              else id
+                . mconcat
+                . fmap (\(w, d) -> (w <>) <$> d)
                 . zip leads
                 $ fmap (wrapOver NoDefault MaybeRequired . first (fmap (nest 2)) . foldTree prefs s) xs
-                )
-          )
         compact :: Chunk Doc
-        compact =
+        compact = annTrace 3 "compact" $
           foldr (chunked (</>) . wrapOver NoDefault MaybeRequired . foldTree prefs s) mempty xs
     in group <$> chunkFlatAlt generous compact
   , mult_wrap xs
@@ -177,14 +177,15 @@ foldTree prefs s (MultNode xs) =
   where
     mult_wrap [_] = NeverRequired
     mult_wrap _ = MaybeRequired
-    leads :: [Chunk Doc]
-    leads = fmap pure (mempty:repeat (line <> pretty "  "))
+    leads :: [Doc]
+    leads = mempty:repeat (line <> pretty "  ")
 
 foldTree prefs s (AltNode b xs) = first (annTrace 3 "foldTree2") $
   (\x -> (x, NeverRequired))
     . fmap groupOrNestLine
     . wrapOver b MaybeRequired
     . alt_node
+    . fmap (first (\d -> annTrace 3 (show d) d))
     . filter (not . isEmpty . fst)
     . map (foldTree prefs s)
     $ xs
@@ -198,7 +199,7 @@ foldTree prefs s (AltNode b xs) = first (annTrace 3 "foldTree2") $
               then mempty
               else
                 ( mconcat
-                . fmap (uncurry (<>))
+                . fmap (\(w, d) -> (w <>) <$> d)
                 . zip leads
                 $ fmap (wrapOver NoDefault MaybeRequired) ns
                 ) <> pure line
@@ -209,11 +210,11 @@ foldTree prefs s (AltNode b xs) = first (annTrace 3 "foldTree2") $
           )
       , AlwaysRequired
       )
-    leads :: [Chunk Doc]
-    leads = fmap pure (pretty " ":repeat (line <> pretty "| "))
+    leads :: [Doc]
+    leads = pretty " ":repeat (line <> pretty "| ")
 
 foldTree prefs s (BindNode x) = first (annTrace 3 "foldTree3") $
-  let rendered =
+  let rendered = annTrace 3 "rendered" $
         wrapOver NoDefault NeverRequired (foldTree prefs s x)
 
       -- We always want to display the rendered option
