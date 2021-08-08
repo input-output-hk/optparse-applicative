@@ -94,8 +94,6 @@ module Options.Applicative (
   showDefault,
   metavar,
   noArgError,
-  helpAlignUsageOverflow,
-  helpHangUsageOverflow,
   helpRenderHelp,
   hidden,
   internal,

@@ -66,7 +66,6 @@ renderAnsi
   where
     alter :: Ann -> Maybe SetStyle
     alter (AnnStyle setStyle) = Just setStyle
-    alter (AnnTrace _ _) = Nothing
     renderPush :: SetStyle -> SetStyle -> B.Builder
     renderPush _ setStyle = B.fromString (styleToRawText setStyle)
     renderPop :: SetStyle -> SetStyle -> B.Builder

@@ -132,7 +132,6 @@ data ParserPrefs = ParserPrefs
   , prefHelpShowGlobal :: Bool                    -- ^ when displaying subparsers' usage help,
                                                   -- show parent options under a "global options"
                                                   -- section (default: True)
-  , prefUsageOverflow :: UsageOverflow            -- ^ how usage overflow over lines is handled
   , prefTabulateFill ::Int                        -- ^ Indentation width for tables
   , prefRenderHelp :: Int -> ParserHelp -> String -- ^ Render help function
   }

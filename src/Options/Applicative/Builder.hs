@@ -88,8 +88,6 @@ module Options.Applicative.Builder (
   columns,
   helpLongEquals,
   helpShowGlobals,
-  helpAlignUsageOverflow,
-  helpHangUsageOverflow,
   helpIndent,
   helpRenderHelp,
   prefs,
@@ -525,14 +523,6 @@ helpLongEquals = PrefsMod $ \p -> p { prefHelpLongEquals = True }
 helpShowGlobals :: PrefsMod
 helpShowGlobals = PrefsMod $ \p -> p { prefHelpShowGlobal = True }
 
--- | Align usage overflow to the right
-helpAlignUsageOverflow :: PrefsMod
-helpAlignUsageOverflow = PrefsMod $ \p -> p { prefUsageOverflow = UsageOverflowAlign }
-
--- | Hang usage overflow to the specified indent
-helpHangUsageOverflow :: Int -> PrefsMod
-helpHangUsageOverflow indentation = PrefsMod $ \p -> p { prefUsageOverflow = UsageOverflowHang indentation }
-
 -- | Custom render function
 helpRenderHelp :: (Int -> ParserHelp -> String) -> PrefsMod
 helpRenderHelp f = PrefsMod $ \p -> p { prefRenderHelp = f }
@@ -556,7 +546,6 @@ prefs m = applyPrefsMod m base
       , prefColumns = 80
       , prefHelpLongEquals = False
       , prefHelpShowGlobal = False
-      , prefUsageOverflow = UsageOverflowAlign
       , prefTabulateFill = 24
       , prefRenderHelp = renderHelp
       }
