@@ -2,18 +2,18 @@ name:                optparse-applicative-fork
 version:             0.17.0.0
 synopsis:            Utilities and combinators for parsing command line options
 description:
-    optparse-applicative is a haskell library for parsing options
+    optparse-applicative-fork is a haskell library for parsing options
     on the command line, and providing a powerful applicative
     interface for composing them.
     .
-    optparse-applicative takes care of reading and validating the
+    optparse-applicative-fork takes care of reading and validating the
     arguments passed to the command line, handling and reporting
     errors, generating a usage line, a comprehensive help screen,
     and enabling context-sensitive bash, zsh, and fish completions.
     .
     See the included README for detailed instructions and examples,
     which is also available on github
-    <https://github.com/pcapriotti/optparse-applicative>.
+    <https://github.com/pcapriotti/optparse-applicative-fork>.
 license:             BSD3
 license-file:        LICENSE
 author:              Paolo Capriotti, Huw Campbell
@@ -42,8 +42,8 @@ extra-source-files:  CHANGELOG.md
                      tests/nested_optional.err.txt
                      tests/subparsers.err.txt
 
-homepage:            https://github.com/pcapriotti/optparse-applicative
-bug-reports:         https://github.com/pcapriotti/optparse-applicative/issues
+homepage:            https://github.com/pcapriotti/optparse-applicative-fork
+bug-reports:         https://github.com/pcapriotti/optparse-applicative-fork/issues
 tested-with:
   GHC==7.0.4,
   GHC==7.2.2,
@@ -61,7 +61,7 @@ tested-with:
 
 source-repository head
   type:     git
-  location: https://github.com/pcapriotti/optparse-applicative.git
+  location: https://github.com/pcapriotti/optparse-applicative-fork.git
 
 flag process
   description:
