@@ -95,7 +95,6 @@ module Options.Applicative (
   showDefault,
   metavar,
   noArgError,
-  helpRenderHelp,
   hidden,
   internal,
   style,
@@ -198,8 +197,10 @@ module Options.Applicative (
   subparserInline,
   columns,
   helpLongEquals,
+  helpEmbedBriefDesc,
   helpShowGlobals,
   helpIndent,
+  helpRenderHelp,
   defaultPrefs,
 
   -- * Completions
