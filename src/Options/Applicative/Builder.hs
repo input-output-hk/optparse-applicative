@@ -87,6 +87,7 @@ module Options.Applicative.Builder (
   subparserInline,
   columns,
   helpLongEquals,
+  helpEmbedBriefDesc,
   helpShowGlobals,
   helpIndent,
   helpRenderHelp,
@@ -528,6 +529,10 @@ helpLongEquals = PrefsMod $ \p -> p { prefHelpLongEquals = True }
 helpShowGlobals :: PrefsMod
 helpShowGlobals = PrefsMod $ \p -> p { prefHelpShowGlobal = True }
 
+-- | Align usage overflow to the right
+helpEmbedBriefDesc :: (Doc -> Doc) -> PrefsMod
+helpEmbedBriefDesc f = PrefsMod $ \p -> p { prefEmbedBriefDesc = f }
+
 -- | Custom render function
 helpRenderHelp :: (Int -> ParserHelp -> String) -> PrefsMod
 helpRenderHelp f = PrefsMod $ \p -> p { prefRenderHelp = f }
@@ -551,6 +556,7 @@ prefs m = applyPrefsMod m base
       , prefColumns = 80
       , prefHelpLongEquals = False
       , prefHelpShowGlobal = False
+      , prefEmbedBriefDesc = id
       , prefTabulateFill = 24
       , prefRenderHelp = renderHelp
       }

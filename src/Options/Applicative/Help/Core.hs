@@ -307,12 +307,11 @@ parserGlobals pprefs p =
 -- | Generate option summary.
 parserUsage :: ParserPrefs -> Parser a -> String -> Doc
 parserUsage pprefs p progn =
-  group $
-    hsep
-      [ string "Usage:",
-        string progn,
-        hangAtIfOver 9 35 (extractChunk (briefDesc pprefs p))
-      ]
+  hsep
+    [ pretty "Usage:"
+    , pretty progn
+    , prefEmbedBriefDesc pprefs (extractChunk (briefDesc pprefs p))
+    ]
 
 -- | Peek at the structure of the rendered tree within.
 --
