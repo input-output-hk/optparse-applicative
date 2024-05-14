@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module Options.Applicative.Help.Chunk
   ( Chunk(..)
   , chunked
@@ -11,6 +13,8 @@ module Options.Applicative.Help.Chunk
   , paragraph
   , extractChunk
   , tabulate
+  , chunkFlatAlt
+  , chunkIsEffectivelyEmpty
   ) where
 
 import Control.Applicative
@@ -125,8 +129,7 @@ stringChunk s = pure (string s)
 --
 -- > isEmpty . paragraph = null . words
 paragraph :: String -> Chunk Doc
-paragraph = foldr (chunked (</>) . stringChunk) mempty
-          . words
+paragraph = foldr (chunked (</>) . stringChunk) mempty . words
 
 -- | Display pairs of strings in a table.
 tabulate :: Int -> [(Doc, Doc)] -> Chunk Doc
@@ -134,3 +137,13 @@ tabulate _ [] = mempty
 tabulate size table = pure $ vcat
   [ indent 2 (fillBreak size key <+> value)
   | (key, value) <- table ]
+
+-- | By default, @('chunkFlatAlt' x y)@ renders as @x@. However when 'group'ed,
+-- @y@ will be preferred, with @x@ as the fallback for the case when @y@
+-- doesn't fit.
+chunkFlatAlt :: Chunk Doc -> Chunk Doc -> Chunk Doc
+chunkFlatAlt x y = pure (flatAlt (extractChunk x) (extractChunk y))
+
+-- | Determine if the document chunk is empty when rendered
+chunkIsEffectivelyEmpty :: Chunk Doc -> Bool
+chunkIsEffectivelyEmpty = maybe True isEffectivelyEmpty . unChunk

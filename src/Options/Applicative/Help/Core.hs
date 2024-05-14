@@ -20,7 +20,8 @@ module Options.Applicative.Help.Core (
   ) where
 
 import Control.Applicative
-import Control.Monad (guard)
+import Control.Monad (guard, MonadPlus)
+import Data.Bifunctor (Bifunctor(first))
 import Data.Function (on)
 import Data.List (sort, intersperse, groupBy)
 import Data.Foldable (any, foldl')
@@ -35,8 +36,12 @@ import Prelude hiding (any)
 
 import Options.Applicative.Common
 import Options.Applicative.Types
-import Options.Applicative.Help.Pretty
 import Options.Applicative.Help.Chunk
+import Options.Applicative.Help.Pretty
+
+{- HLINT ignore "Redundant $" -}
+{- HLINT ignore "Use <$>" -}
+{- HLINT ignore "Use tuple-section" -}
 
 -- | Style for rendering an option.
 data OptDescStyle
@@ -135,12 +140,13 @@ briefDesc' showOptional pprefs =
 -- | Wrap a doc in parentheses or brackets if required.
 wrapOver :: AltNodeType -> Parenthetic -> (Chunk Doc, Parenthetic) -> Chunk Doc
 wrapOver altnode mustWrapBeyond (chunk, wrapping)
+  | chunkIsEffectivelyEmpty chunk =
+      chunk
   | altnode == MarkDefault =
-    fmap brackets chunk
+      fmap brackets chunk
   | wrapping > mustWrapBeyond =
-    fmap parens chunk
-  | otherwise =
-    chunk
+      fmap parens chunk
+  | otherwise = chunk
 
 -- Fold a tree of option docs into a single doc with fully marked
 -- optional areas and groups.
@@ -148,16 +154,29 @@ foldTree :: ParserPrefs -> OptDescStyle -> OptTree (Chunk Doc, Parenthetic) -> (
 foldTree _ _ (Leaf x) =
   x
 foldTree prefs s (MultNode xs) =
-  let go =
-        (<</>>) . wrapOver NoDefault MaybeRequired . foldTree prefs s
-      x =
-        foldr go mempty xs
-      wrapLevel =
-        mult_wrap xs
-   in (x, wrapLevel)
+  ( let generous :: Chunk Doc
+        generous =
+          ( if null xs
+              then mempty
+              else
+                ( mconcat
+                . fmap (uncurry (<>))
+                . zip leads
+                $ fmap (wrapOver NoDefault MaybeRequired . first (fmap (nest 2)) . foldTree prefs s) xs
+                ) <> pure line
+          )
+        compact :: Chunk Doc
+        compact =
+          foldr (chunked (</>) . wrapOver NoDefault MaybeRequired . foldTree prefs s) mempty xs
+    in group <$> chunkFlatAlt generous compact
+  , mult_wrap xs
+  )
   where
     mult_wrap [_] = NeverRequired
     mult_wrap _ = MaybeRequired
+    leads :: [Chunk Doc]
+    leads = fmap pure (pretty " ":repeat (line <> pretty "  "))
+
 foldTree prefs s (AltNode b xs) =
   (\x -> (x, NeverRequired))
     . fmap groupOrNestLine
@@ -170,9 +189,26 @@ foldTree prefs s (AltNode b xs) =
     alt_node :: [(Chunk Doc, Parenthetic)] -> (Chunk Doc, Parenthetic)
     alt_node [n] = n
     alt_node ns =
-      (\y -> (y, AlwaysRequired))
-        . foldr (chunked altSep . wrapOver NoDefault MaybeRequired) mempty
-        $ ns
+      ( fmap group
+        $ chunkFlatAlt
+          ( if null ns
+              then mempty
+              else
+                ( mconcat
+                . fmap (uncurry (<>))
+                . zip leads
+                $ fmap (wrapOver NoDefault MaybeRequired) ns
+                ) <> pure line
+          )
+
+          ( foldr (chunked altSep . wrapOver NoDefault MaybeRequired) mempty
+          $ ns
+          )
+      , AlwaysRequired
+      )
+    leads :: [Chunk Doc]
+    leads = fmap pure (pretty " ":repeat (line <> pretty "| "))
+
 foldTree prefs s (BindNode x) =
   let rendered =
         wrapOver NoDefault NeverRequired (foldTree prefs s x)
@@ -250,7 +286,6 @@ parserHelp pprefs p =
         vcatChunks (snd <$> a)
     group_title _ = mempty
 
-    with_title :: String -> Chunk Doc -> Chunk Doc
     with_title title = fmap (string title .$.)
 
 
@@ -265,11 +300,20 @@ parserGlobals pprefs p =
 -- | Generate option summary.
 parserUsage :: ParserPrefs -> Parser a -> String -> Doc
 parserUsage pprefs p progn =
-  hsep
-    [ string "Usage:",
-      string progn,
-      align (extractChunk (briefDesc pprefs p))
-    ]
+  case prefUsageOverflow pprefs of
+    UsageOverflowAlign ->
+      hsep
+        [ string "Usage:",
+          string progn,
+          align (extractChunk (briefDesc pprefs p))
+        ]
+    UsageOverflowHang level ->
+      hang level $
+        hsep
+          [ string "Usage:",
+            string progn,
+            extractChunk (briefDesc pprefs p)
+          ]
 
 -- | Peek at the structure of the rendered tree within.
 --
