@@ -13,6 +13,7 @@ import Options.Applicative.Help.Chunk
 import Options.Applicative.Help.Pretty
 import Options.Applicative.Help.Style (SetStyle (..), styleToRawText, defaultStyle)
 import Prelude
+import Prettyprinter (alterAnnotationsS)
 import Prettyprinter.Internal (textSpaces)
 import Prettyprinter.Render.Util.Panic
 
@@ -66,7 +67,6 @@ renderAnsi
   where
     alter :: Ann -> Maybe SetStyle
     alter (AnnStyle setStyle) = Just setStyle
-    alter (AnnTrace _ _) = Nothing
     renderPush :: SetStyle -> SetStyle -> B.Builder
     renderPush _ setStyle = B.fromString (styleToRawText setStyle)
     renderPop :: SetStyle -> SetStyle -> B.Builder

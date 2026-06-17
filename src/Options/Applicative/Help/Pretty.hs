@@ -87,12 +87,11 @@ import           Prelude
 
 type Doc = PPI.Doc Ann
 
--- | Traced version of 'PP.indent'.
 indent :: Int -> Doc -> Doc
-indent n = annTrace 1 "indent" . PP.indent n
+indent n = PP.indent n
 
 (.$.) :: Doc -> Doc -> Doc
-(.$.) x y = annTrace 1 "(.$.)" (x <> line <> y)
+(.$.) x y = x <> line <> y
 
 -- | Apply the function if we're not at the
 --   start of our nesting level.
@@ -123,7 +122,7 @@ ifElseAtRoot f g doc =
 --   This will also nest subsequent lines in the
 --   group.
 groupOrNestLine :: Doc -> Doc
-groupOrNestLine d = annTrace 1 "groupOrNestLine" $
+groupOrNestLine d =
   (PPI.Union
     <$> flatten
     <*> ifNotAtRoot (line <>)) d
@@ -178,47 +177,41 @@ hangAtIfOver i j d =
       linebreak <> ifAtRoot (indent i) d
 
 (</>) :: Doc -> Doc -> Doc
-(</>) x y = annTrace 1 "(</>)" $ x <> softline <> y
+(</>) x y = x <> softline <> y
 
 (<$$>) :: Doc -> Doc -> Doc
-(<$$>) x y = annTrace 1 "(<$$>)" $x <> linebreak <> y
+(<$$>) x y = x <> linebreak <> y
 
 (<//>) :: Doc -> Doc -> Doc
-(<//>) x y = annTrace 1 "(<//>)" $ x <> softbreak <> y
+(<//>) x y = x <> softbreak <> y
 
 linebreak :: Doc
-linebreak = annTrace 0 "linebreak" $ flatAlt line mempty
+linebreak = flatAlt line mempty
 
 softbreak :: Doc
-softbreak = annTrace 0 "softbreak" $ group linebreak
+softbreak = group linebreak
 
--- | Traced version of 'PP.string'.
 string :: String -> Doc
-string = annTrace 0 "string" . PP.pretty
+string = PP.pretty
 
--- | Traced version of 'PP.parens'.
 parens :: Doc -> Doc
-parens = annTrace 1 "parens" . PP.parens
+parens = PP.parens
 
--- | Traced version of 'PP.brackets'.
 brackets :: Doc -> Doc
-brackets = annTrace 1 "brackets" . PP.brackets
+brackets = PP.brackets
 
--- | Traced version of 'PP.enclose'.
 enclose
     :: Doc -- ^ L
     -> Doc -- ^ R
     -> Doc -- ^ x
     -> Doc -- ^ LxR
-enclose l r x = annTrace 1 "enclose" (PP.enclose l r x)
+enclose l r x = PP.enclose l r x
 
--- | Traced version of 'PP.hang'.
 hang :: Int -> Doc -> Doc
-hang n = annTrace 1 "hang" . PP.hang n
+hang n = PP.hang n
 
--- | Traced version of 'PP.nest'.
 nest :: Int -> Doc -> Doc
-nest n = annTrace 1 "nest" . PP.nest n
+nest n = PP.nest n
 
 -- | Determine if the document is empty when rendered
 isEffectivelyEmpty :: Doc -> Bool
