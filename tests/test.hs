@@ -28,7 +28,7 @@ import qualified Options.Applicative.NonEmpty
 
 
 import qualified Options.Applicative.Help as H
-import           Options.Applicative.Help.Pretty (Doc, SimpleDoc(..))
+import           Options.Applicative.Help.Pretty (Doc)
 import qualified Options.Applicative.Help.Pretty as Doc
 import           Options.Applicative.Help.Chunk
 import           Options.Applicative.Help.Levenshtein
@@ -925,7 +925,7 @@ prop_extractChunk_1 x = extractChunk (pure x) === x
 prop_extractChunk_2 :: Chunk String -> Property
 prop_extractChunk_2 x = extractChunk (fmap pure x) === x
 
-prop_stringChunk_1 :: Positive Float -> Positive Int -> String -> Property
+prop_stringChunk_1 :: Positive Double -> Positive Int -> String -> Property
 prop_stringChunk_1 (Positive f) (Positive w) s =
   equalDocs f w (extractChunk (stringChunk s))
                 (Doc.string s)
