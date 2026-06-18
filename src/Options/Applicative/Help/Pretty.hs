@@ -23,6 +23,8 @@ module Options.Applicative.Help.Pretty
   , indent
   , nest
 
+  , text
+  , plain
   , string
 
   , (<$$>)
@@ -164,3 +166,8 @@ prettyString ribbonFraction lineWidth
 streamToString :: SimpleDoc -> String
 streamToString = Lazy.unpack . Prettyprinter.Render.Terminal.renderLazy
 
+text :: String -> Doc
+text = pretty
+
+plain :: Doc -> Doc
+plain = unAnnotate
