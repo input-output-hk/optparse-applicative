@@ -140,7 +140,9 @@ tabulate size table = pure $ vcat
 -- @y@ will be preferred, with @x@ as the fallback for the case when @y@
 -- doesn't fit.
 chunkFlatAlt :: Chunk Doc -> Chunk Doc -> Chunk Doc
-chunkFlatAlt x y = pure (flatAlt (extractChunk x) (extractChunk y))
+chunkFlatAlt x y = if isEffectivelyEmpty doc then mempty else pure doc
+  where
+    doc = flatAlt (extractChunk x) (extractChunk y)
 
 -- | Determine if the document chunk is empty when rendered
 chunkIsEffectivelyEmpty :: Chunk Doc -> Bool
