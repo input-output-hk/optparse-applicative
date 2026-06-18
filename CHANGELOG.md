@@ -8,6 +8,32 @@
   groups. Requires the breaking change of adding the `propGroup :: OptGroup`
   field to `OptProperties`.
 
+### Migration from optparse-applicative-fork-0.18.1.0
+
+Breaking changes relative to the last fork release:
+
+- **`helpDoc` signature** (upstream change): `helpDoc :: Doc -> Mod f a` is
+  now `helpDoc :: Maybe Doc -> Mod f a`. Call sites must wrap the argument in
+  `Just`, e.g. `helpDoc (Just myDoc)`.
+
+- **Color/style functions removed**: `bold`, `underline`, `deunderline`,
+  `debold`, and all background/foreground colour functions (`ondullwhite`,
+  `onwhite`, `dullcyan`, `cyan`, ...) are no longer exported from
+  `Options.Applicative.Help.Pretty`. The upstream `prettyprinter-ansi-terminal`
+  annotation API (`annotate`, `AnsiStyle`) should be used directly instead.
+
+- **`plain` behaviour**: previously a no-op (`id`), now correctly strips all
+  annotations (`unAnnotate`).
+
+- **`renderShowS` removed**: use `prettyString` or `streamToString` instead.
+
+- **`prefBriefHangPoint` / `briefHangPoint` removed**: replaced by
+  `prefEmbedBriefDesc :: Doc -> Doc` and the `helpEmbedBriefDesc` modifier,
+  which gives full control over how the usage line wraps.
+
+- **`parserOptionGroup` / `OptGroup` / `propGroup` removed**: the grouping
+  mechanism has been dropped in this fork revision.
+
 
 ## Version 0.18.1.0 (29 May 2023)
 
