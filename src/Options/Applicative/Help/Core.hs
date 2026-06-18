@@ -296,7 +296,7 @@ parserUsage pprefs p progn =
   hsep
     [ pretty "Usage:"
     , pretty progn
-    , align (extractChunk (briefDesc pprefs p))
+    , prefEmbedBriefDesc pprefs (align (extractChunk (briefDesc pprefs p)))
     ]
 
 -- | Peek at the structure of the rendered tree within.

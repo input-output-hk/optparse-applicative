@@ -49,7 +49,6 @@ module Options.Applicative.Builder (
   completer,
   idm,
   mappend,
-  parserOptionGroup,
 
   -- * Readers
   --
@@ -88,9 +87,10 @@ module Options.Applicative.Builder (
   subparserInline,
   columns,
   helpLongEquals,
+  helpEmbedBriefDesc,
   helpShowGlobals,
   helpIndent,
-  briefHangPoint,
+  helpRenderHelp,
   prefs,
   defaultPrefs,
 
@@ -109,8 +109,8 @@ module Options.Applicative.Builder (
   ) where
 
 import Control.Applicative
-#if __GLASGOW_HASKELL__ < 804
-import Data.Semigroup hiding (Option, option)
+#if __GLASGOW_HASKELL__ <= 802
+import Data.Semigroup hiding (option)
 #endif
 import Data.String (fromString, IsString)
 
@@ -118,9 +118,9 @@ import Options.Applicative.Builder.Completer
 import Options.Applicative.Builder.Internal
 import Options.Applicative.Common
 import Options.Applicative.Types
-import Options.Applicative.Help.Pretty
 import Options.Applicative.Help.Chunk
-import Options.Applicative.Internal (mapParserOptions)
+import Options.Applicative.Help.Pretty
+import Options.Applicative.Help.Types (renderHelp)
 
 -- Readers --
 
@@ -382,56 +382,6 @@ option r m = mkParser d g rdr
     crdr = CReader (optCompleter fields) r
     rdr = OptReader (optNames fields) crdr (optNoArgError fields)
 
--- | Prepends a group to 'OptProperties'. Nested groups are indented e.g.
---
--- @
---   optPropertiesGroup "Group Outer" (optPropertiesGroup "Group Inner" o)
--- @
---
--- will render as:
---
--- @
---  Group Outer
---  - Group Inner
---    ...
--- @
-optPropertiesGroup :: String -> OptProperties -> OptProperties
-optPropertiesGroup g o = o { propGroup = OptGroup (g : oldGroup) }
-  where
-    OptGroup oldGroup = propGroup o
-
--- | Prepends a group per 'optPropertiesGroup'.
-optionGroup :: String -> Option a -> Option a
-optionGroup grp o = o { optProps = props' }
-  where
-    props' = optPropertiesGroup grp (optProps o)
-
--- | Group options together under a common heading in the help text.
---
--- For example, if we have:
---
--- > Args
--- >   <$> parseMain
--- >   <*> parserOptionGroup "Group A" parseA
--- >   <*> parserOptionGroup "Group B" parseB
--- >   <*> parseOther
---
--- Then the help page will look like:
---
--- > Available options:
--- >   <main options>
--- >   <other options>
--- >
--- > Group A
--- >   <A options>
--- >
--- > Group B
--- >   <B options>
---
--- @since 0.19.0.0
-parserOptionGroup :: String -> Parser a -> Parser a
-parserOptionGroup g = mapParserOptions (optionGroup g)
-
 -- | Modifier for 'ParserInfo'.
 newtype InfoMod a = InfoMod
   { applyInfoMod :: ParserInfo a -> ParserInfo a }
@@ -579,13 +529,18 @@ helpLongEquals = PrefsMod $ \p -> p { prefHelpLongEquals = True }
 helpShowGlobals :: PrefsMod
 helpShowGlobals = PrefsMod $ \p -> p { prefHelpShowGlobal = True }
 
+-- | Align usage overflow to the right
+helpEmbedBriefDesc :: (Doc -> Doc) -> PrefsMod
+helpEmbedBriefDesc f = PrefsMod $ \p -> p { prefEmbedBriefDesc = f }
+
+-- | Custom render function
+helpRenderHelp :: (Int -> ParserHelp -> String) -> PrefsMod
+helpRenderHelp f = PrefsMod $ \p -> p { prefRenderHelp = f }
+
 -- | Set fill width in help text presentation.
 helpIndent :: Int -> PrefsMod
 helpIndent w = PrefsMod $ \p -> p { prefTabulateFill = w }
 
--- | Set the width at which to hang the brief help text.
-briefHangPoint :: Int -> PrefsMod
-briefHangPoint php = PrefsMod $ \p -> p { prefBriefHangPoint = php }
 
 
 -- | Create a `ParserPrefs` given a modifier
@@ -601,8 +556,10 @@ prefs m = applyPrefsMod m base
       , prefColumns = 80
       , prefHelpLongEquals = False
       , prefHelpShowGlobal = False
+      , prefEmbedBriefDesc = id
       , prefTabulateFill = 24
-      , prefBriefHangPoint = 35 }
+      , prefRenderHelp = renderHelp
+      }
 
 -- Convenience shortcuts
 

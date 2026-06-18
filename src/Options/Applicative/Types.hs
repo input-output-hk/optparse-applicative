@@ -3,6 +3,7 @@ module Options.Applicative.Types (
   ParseError(..),
   ParserInfo(..),
   ParserPrefs(..),
+  UsageOverflow(..),
 
   Option(..),
   OptName(..),
@@ -11,7 +12,6 @@ module Options.Applicative.Types (
 
   OptReader(..),
   OptProperties(..),
-  OptGroup(..),
   OptVisibility(..),
   Backtracking(..),
   ReadM(..),
@@ -108,28 +108,34 @@ data Backtracking
   | SubparserInline
   deriving (Eq, Show)
 
+data UsageOverflow
+  = UsageOverflowAlign    -- ^ usage is aligned to the right of the command
+  | UsageOverflowHang Int -- ^ usage follows a hanging indent with indent level supplied
+  deriving (Eq, Show)
+
 -- | Global preferences for a top-level 'Parser'.
 data ParserPrefs = ParserPrefs
-  { prefMultiSuffix :: String     -- ^ metavar suffix for multiple options
-  , prefDisambiguate :: Bool      -- ^ automatically disambiguate abbreviations
-                                  -- (default: False)
-  , prefShowHelpOnError :: Bool   -- ^ always show help text on parse errors
-                                  -- (default: False)
-  , prefShowHelpOnEmpty :: Bool   -- ^ show the help text for a command or subcommand
-                                  -- if it fails with no input (default: False)
-  , prefBacktrack :: Backtracking -- ^ backtrack to parent parser when a
-                                  -- subcommand fails (default: Backtrack)
-  , prefColumns :: Int            -- ^ number of columns in the terminal, used to
-                                  -- format the help page (default: 80)
-  , prefHelpLongEquals :: Bool    -- ^ when displaying long names in usage and help,
-                                  -- use an '=' sign for long names, rather than a
-                                  -- single space (default: False)
-  , prefHelpShowGlobal :: Bool    -- ^ when displaying subparsers' usage help,
-                                  -- show parent options under a "global options"
-                                  -- section (default: False)
-  , prefTabulateFill ::Int        -- ^ Indentation width for tables
-  , prefBriefHangPoint :: Int     -- ^ Width at which to hang the brief description
-  } deriving (Eq, Show)
+  { prefMultiSuffix :: String                     -- ^ metavar suffix for multiple options
+  , prefDisambiguate :: Bool                      -- ^ automatically disambiguate abbreviations
+                                                  -- (default: False)
+  , prefShowHelpOnError :: Bool                   -- ^ always show help text on parse errors
+                                                  -- (default: False)
+  , prefShowHelpOnEmpty :: Bool                   -- ^ show the help text for a command or subcommand
+                                                  -- if it fails with no input (default: False)
+  , prefBacktrack :: Backtracking                 -- ^ backtrack to parent parser when a
+                                                  -- subcommand fails (default: Backtrack)
+  , prefColumns :: Int                            -- ^ number of columns in the terminal, used to
+                                                  -- format the help page (default: 80)
+  , prefHelpLongEquals :: Bool                    -- ^ when displaying long names in usage and help,
+                                                  -- use an '=' sign for long names, rather than a
+                                                  -- single space (default: False)
+  , prefHelpShowGlobal :: Bool                    -- ^ when displaying subparsers' usage help,
+                                                  -- show parent options under a "global options"
+                                                  -- section (default: False)
+  , prefEmbedBriefDesc :: Doc -> Doc              -- ^ how usage overflow over lines is handled
+  , prefTabulateFill ::Int                        -- ^ Indentation width for tables
+  , prefRenderHelp :: Int -> ParserHelp -> String -- ^ Render help function
+  }
 
 data OptName = OptShort !Char
              | OptLong !String
@@ -149,12 +155,6 @@ data OptVisibility
   | Visible           -- ^ visible both in the full and brief descriptions
   deriving (Eq, Ord, Show)
 
--- | Groups for optionals. Can be multiple in the case of nested groups.
---
--- @since 0.19.0.0
-newtype OptGroup = OptGroup [String]
-  deriving (Eq, Ord, Show)
-
 -- | Specification for an individual parser option.
 data OptProperties = OptProperties
   { propVisibility :: OptVisibility       -- ^ whether this flag is shown in the brief description
@@ -163,23 +163,17 @@ data OptProperties = OptProperties
   , propShowDefault :: Maybe String       -- ^ what to show in the help text as the default
   , propShowGlobal :: Bool                -- ^ whether the option is presented in global options text
   , propDescMod :: Maybe ( Doc -> Doc )   -- ^ a function to run over the brief description
-  , propGroup :: OptGroup
-    -- ^ optional group(s)
-    --
-    -- @since 0.19.0.0
   }
 
 instance Show OptProperties where
-  showsPrec p (OptProperties pV pH pMV pSD pSG _ pGrp)
+  showsPrec p (OptProperties pV pH pMV pSD pSG _)
     = showParen (p >= 11)
     $ showString "OptProperties { propVisibility = " . shows pV
     . showString ", propHelp = " . shows pH
     . showString ", propMetaVar = " . shows pMV
     . showString ", propShowDefault = " . shows pSD
     . showString ", propShowGlobal = " . shows pSG
-    . showString ", propDescMod = _"
-    . showString ", propGroup = " . shows pGrp
-    . showString "}"
+    . showString ", propDescMod = _ }"
 
 -- | A single option of a parser.
 data Option a = Option
@@ -189,9 +183,8 @@ data Option a = Option
 
 data SomeParser = forall a . SomeParser (Parser a)
 
--- | Subparser context, containing the name of the subparser and its parser info.
---   Used by 'Options.Applicative.Extra.parserFailure' to display relevant usage
---   information when parsing inside a subparser fails.
+-- | Subparser context, containing the 'name' of the subparser and its parser info.
+--   Used by parserFailure to display relevant usage information when parsing inside a subparser fails.
 data Context = forall a. Context String (ParserInfo a)
 
 instance Show (Option a) where
@@ -266,7 +259,7 @@ instance Functor OptReader where
   fmap f (ArgReader cr) = ArgReader (fmap f cr)
   fmap f (CmdReader n cs) = CmdReader n ((fmap . fmap . fmap) f cs)
 
--- | A @Parser a@ is an option parser returning a value of type @a@.
+-- | A @Parser a@ is an option parser returning a value of type 'a'.
 data Parser a
   = NilP (Maybe a)
   | OptP (Option a)
@@ -357,7 +350,7 @@ instance Functor ParserFailure where
   fmap f (ParserFailure err) = ParserFailure $ \progn ->
     let (h, exit, cols) = err progn in (f h, exit, cols)
 
--- | Result of 'Options.Applicative.execParserPure'.
+-- | Result of 'execParserPure'.
 data ParserResult a
   = Success a
   | Failure (ParserFailure ParserHelp)
