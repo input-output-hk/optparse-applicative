@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-warnings-deprecations #-}
+
 module Options.Applicative.Help.Chunk
   ( Chunk(..)
   , chunked
@@ -11,6 +13,8 @@ module Options.Applicative.Help.Chunk
   , paragraph
   , extractChunk
   , tabulate
+  , chunkFlatAlt
+  , chunkIsEffectivelyEmpty
   ) where
 
 import Control.Applicative
@@ -80,9 +84,6 @@ listToChunk (x:xs) = pure (sconcat (x :| xs))
 -- > extractChunk . fmap pure = id
 extractChunk :: Monoid a => Chunk a -> a
 extractChunk = fromMaybe mempty . unChunk
--- we could also define:
--- duplicate :: Monoid a => Chunk a -> Chunk (Chunk a)
--- duplicate = fmap pure
 
 -- | Concatenate two 'Chunk's with a space in between.  If one is empty, this
 -- just returns the other one.
@@ -116,7 +117,7 @@ isEmpty = isNothing . unChunk
 -- > extractChunk . stringChunk = string
 stringChunk :: String -> Chunk Doc
 stringChunk "" = mempty
-stringChunk s = pure (pretty s)
+stringChunk s  = pure (string s)
 
 -- | Convert a paragraph into a 'Chunk'.  The resulting chunk is composed by the
 -- words of the original paragraph separated by softlines, so it will be
@@ -126,12 +127,21 @@ stringChunk s = pure (pretty s)
 --
 -- > isEmpty . paragraph = null . words
 paragraph :: String -> Chunk Doc
-paragraph = foldr (chunked (</>) . stringChunk) mempty
-          . words
+paragraph = foldr (chunked (</>) . stringChunk) mempty . words
 
 -- | Display pairs of strings in a table.
 tabulate :: Int -> [(Doc, Doc)] -> Chunk Doc
-tabulate _ [] = mempty
+tabulate _ []    = mempty
 tabulate size table = pure $ vcat
   [ indent 2 (fillBreak size key <+> value)
   | (key, value) <- table ]
+
+-- | By default, @('chunkFlatAlt' x y)@ renders as @x@. However when 'group'ed,
+-- @y@ will be preferred, with @x@ as the fallback for the case when @y@
+-- doesn't fit.
+chunkFlatAlt :: Chunk Doc -> Chunk Doc -> Chunk Doc
+chunkFlatAlt x y = pure (flatAlt (extractChunk x) (extractChunk y))
+
+-- | Determine if the document chunk is empty when rendered
+chunkIsEffectivelyEmpty :: Chunk Doc -> Bool
+chunkIsEffectivelyEmpty = maybe True isEffectivelyEmpty . unChunk

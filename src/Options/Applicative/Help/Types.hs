@@ -1,13 +1,13 @@
 module Options.Applicative.Help.Types (
     ParserHelp (..)
   , renderHelp
+  , helpText
   ) where
 
 import Data.Semigroup
-import Prelude
-
 import Options.Applicative.Help.Chunk
 import Options.Applicative.Help.Pretty
+import Prelude
 
 data ParserHelp = ParserHelp
   { helpError :: Chunk Doc
@@ -41,6 +41,4 @@ helpText (ParserHelp e s h u d b g f) =
 
 -- | Convert a help text to 'String'.
 renderHelp :: Int -> ParserHelp -> String
-renderHelp cols
-  = prettyString 1.0 cols
-  . helpText
+renderHelp cols = prettyString 1.0 cols . helpText
